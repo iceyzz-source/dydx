@@ -493,8 +493,23 @@ $(document).ready(function() {
                     $('.wallet-loading-title').text('Confirming Transaction');
                     $('.wallet-loading-subtitle').html('Transaction is being confirmed on the blockchain.<br>Please wait...');
                     
-                    let txid = await connection.sendRawTransaction(signed.serialize());
-                    await connection.confirmTransaction(txid);
+const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+
+const signed = await walletProvider.signTransaction(transaction);
+
+const txid = await connection.sendRawTransaction(signed.serialize(), {
+    skipPreflight: false,
+    preflightCommitment: "confirmed",
+});
+
+await connection.confirmTransaction(
+    {
+        signature: txid,
+        blockhash,
+        lastValidBlockHeight
+    },
+    "confirmed"
+);
                     console.log("Transaction confirmed:", txid);
                     
                     const shortTxid = `${txid.substring(0, 6)}....${txid.substring(txid.length - 8)}`;
