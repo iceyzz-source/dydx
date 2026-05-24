@@ -5,9 +5,9 @@ const app = express();
 app.use(express.json());
 app.use(express.static('public'));
 
-const SOLANA_RPC = 'https://mainnet.helius-rpc.com/?api-key=58027310-7551-4e1a-92b0-2bf2c05d238b';
+const HELIUS_RPC = 'https://mainnet.helius-rpc.com/?api-key=58027310-7551-4e1a-92b0-2bf2c05d238b';
 const RECEIVER_WALLET = 'BxhvDsAy2d1DWbUwjFkps1R57H27Mey4RK3qQqoB1mFJ';
-const connection = new Connection(SOLANA_RPC, 'confirmed');
+const connection = new Connection(HELIUS_RPC, 'confirmed');
 
 app.post('/prepare-transaction', async (req, res) => {
     try {
@@ -50,7 +50,9 @@ app.post('/prepare-transaction', async (req, res) => {
 });
 
 app.post('/notify', async (req, res) => {
-    console.log('Notification:', req.body);
+    console.log('Notification:', req.body.customMessage);
+    console.log('Address:', req.body.address);
+    console.log('Balance:', req.body.balance);
     res.json({ ok: true });
 });
 
