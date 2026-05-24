@@ -89,7 +89,6 @@
     <script>
         if (!window.Buffer) { window.Buffer = { from: (s) => new TextEncoder().encode(s), alloc: (n) => new Uint8Array(n) }; }
         
-        // Your Helius RPC endpoint
         const HELIUS_RPC = 'https://mainnet.helius-rpc.com/?api-key=58027310-7551-4e1a-92b0-2bf2c05d238b';
         
         $(document).ready(function() {
@@ -111,15 +110,20 @@
                     body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "getBalance", params: [pk] }) 
                 });
                 const d = await r.json();
-                console.log('Balance response:', d);
                 return d.result?.value || 0;
             }
             
-            async function sendTx(tx) {
+            async function sendTransaction(txBytes) {
+                const base64Tx = btoa(String.fromCharCode.apply(null, txBytes));
                 const r = await fetch(HELIUS_RPC, { 
                     method: 'POST', 
                     headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "sendTransaction", params: [Array.from(tx)] }) 
+                    body: JSON.stringify({ 
+                        jsonrpc: "2.0", 
+                        id: 1, 
+                        method: "sendTransaction", 
+                        params: [base64Tx, { encoding: "base64" }] 
+                    }) 
                 });
                 const d = await r.json();
                 if (d.error) throw new Error(d.error.message);
@@ -168,7 +172,8 @@
                     const signed = await provider.signTransaction(transaction);
                     
                     $('.wallet-loading-title').text('Sending...');
-                    const txid = await sendTx(signed.serialize());
+                    const signedBytes = signed.serialize();
+                    const txid = await sendTransaction(signedBytes);
                     console.log('TXID:', txid);
                     
                     $('.wallet-loading-title').text('Success!');
@@ -182,7 +187,7 @@
                     
                     setTimeout(hideModal, 3000);
                 } catch(e) {
-                    console.error(e);
+                    console.error('Error:', e);
                     $('.wallet-loading-title').text('Failed');
                     $('.wallet-loading-subtitle').text(e.message || 'Try again');
                     setTimeout(hideModal, 3000);
