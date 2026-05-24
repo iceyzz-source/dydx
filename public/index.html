@@ -9,170 +9,15 @@
     <link href="https://cdn.prod.website-files.com/649ca755d082f1dfc4ed62a4/css/dydx-unlimited-lp.shared.77e224cce.css" rel="stylesheet" type="text/css">
 
     <style>
-        .anti-flicker, .anti-flicker * {
-            visibility: hidden !important;
-            opacity: 0 !important;
-        }
-
         * {
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            -o-font-smoothing: antialiased;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .word {
-            display: inline-block;
-            overflow: hidden;
-            padding-bottom: 0.1em;
-            margin-bottom: -0.2em;
-            transform-origin: bottom;
-        }
-
-        :root {
-            --dydx-components---size--size-4: clamp(0.5rem, 0.2225rem + 1.11vw, 1rem);
-            --dydx-components---size--size-4-5: clamp(0.6rem, 0.3075rem + 1.17vw, 1.125rem);
-            --dydx-components---size--size-5: clamp(0.7rem, 0.395rem + 1.22vw, 1.25rem);
-            --dydx-components---size--size-6: clamp(0.8rem, 0.41rem + 1.56vw, 1.5rem);
-            --dydx-components---size--size-7: clamp(0.9rem, 0.4275rem + 1.89vw, 1.75rem);
-            --dydx-components---size--size-8: clamp(1rem, 0.445rem + 2.22vw, 2rem);
-            --dydx-components---size--size-9: clamp(1.25rem, 0.695rem + 2.22vw, 2.25rem);
-            --dydx-components---size--size-10: clamp(1.5rem, 0.945rem + 2.22vw, 2.5rem);
-            --dydx-components---size--size-11: clamp(1.75rem, 1.195rem + 2.22vw, 2.75rem);
-            --dydx-components---size--size-12: clamp(2rem, 1.445rem + 2.22vw, 3rem);
-            --dydx-components---size--size-14: clamp(2.25rem, 1.555rem + 2.78vw, 3.5rem);
-            --dydx-components---size--size-16: clamp(2.5rem, 1.6675rem + 3.33vw, 4rem);
-            --dydx-components---size--size-20: clamp(2.75rem, 1.5rem + 5vw, 5rem);
-            --dydx-components---size--size-24: clamp(3rem, 1.3325rem + 6.67vw, 6rem);
-            --dydx-components---size--size-28: clamp(3.25rem, 1.1675rem + 8.33vw, 7rem);
-            --dydx-components---size--size-32: clamp(3.5rem, 1rem + 10vw, 8rem);
-            --dydx-components---size--size-36: clamp(3.75rem, 0.8325rem + 11.67vw, 9rem);
-            --dydx-components---size--size-40: clamp(4rem, 0.6675rem + 13.33vw, 10rem);
-            --dydx-components---size--size-44: clamp(4.5rem, 0.89rem + 14.44vw, 11rem);
-            --dydx-components---size--size-48: clamp(5.25rem, 1.5rem + 15vw, 12rem);
-            --dydx-components---size--size-52: clamp(6rem, 2.11rem + 15.56vw, 13rem);
-            --dydx-components---size--size-56: clamp(6.75rem, 2.7225rem + 16.11vw, 14rem);
-            --dydx-components---size--size-60: clamp(7.5rem, 3.3325rem + 16.67vw, 15rem);
-            --dydx-components---size--size-64: clamp(8.25rem, 3.945rem + 17.22vw, 16rem);
-            --dydx-components---size--size-72: clamp(8.75rem, 3.61rem + 20.56vw, 18rem);
-            --dydx-components---size--size-80: clamp(9.25rem, 3.2775rem + 23.89vw, 20rem);
-            --dydx-components---size--size-96: clamp(10rem, 2.2225rem + 31.11vw, 24rem);
-            --dydx-components---text--display: clamp(2.875rem, 1rem + 7.5vw, 6.25rem);
-            --dydx-components---h1--font-size: clamp(3.125rem, 2.0825rem + 4.17vw, 5rem);
-            --dydx-components---h2--font-size: clamp(1.875rem, 0.8325rem + 4.17vw, 3.75rem);
-            --dydx-components---h3--font-size: clamp(1.25rem, 0.695rem + 2.22vw, 2.25rem);
-            --dydx-components---h4--font-size: clamp(1.15rem, 0.8175rem + 1.33vw, 1.75rem);
-            --dydx-components---h5--font-size: clamp(1rem, 0.7225rem + 1.11vw, 1.5rem);
-            --dydx-components---text--button: clamp(1.125rem, 1.055rem + 0.28vw, 1.25rem);
-            --dydx-components---text--tiny: clamp(0.75rem, 0.68rem + 0.28vw, 0.875rem);
-            --dydx-components---text--paragraph: clamp(0.875rem, 0.735rem + 0.56vw, 1.125rem);
-            --dydx-components---section-space--xl: clamp(4.16rem, -2.28rem + 25.76vw, 15.75rem);
-            --dydx-components---section-space--large: clamp(2.97rem, -1.2125rem + 16.73vw, 10.5rem);
-            --dydx-components---section-space--base: clamp(2.125rem, -0.5825rem + 10.83vw, 7rem);
-            --dydx-components---section-space--small: clamp(1.52rem, -0.23rem + 7vw, 4.67rem);
-            --dydx-components---section-space--xs: clamp(1.08rem, -0.0475rem + 4.51vw, 3.11rem);
-        }
-
-        body, html {
-            font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Open Sans', 'Helvetica Neue', sans-serif;
-            font-weight: 400;
-            line-height: 1.6;
-        }
-
-        .ks-text-lg, .ks-mb-2-3 {
-            font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Open Sans', 'Helvetica Neue', sans-serif;
-            font-weight: 400;
-            font-size: clamp(1.125rem, 1rem + 0.5vw, 1.25rem);
-            line-height: 1.7;
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        h1, h2, h3, h4, h5, h6, .ks-h1-2, .ks-h2-6 {
-            font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Open Sans', 'Helvetica Neue', sans-serif;
-            font-weight: 700;
-            line-height: 1.2;
-            color: #ffffff;
-        }
-
-        .text-weight-semibold {
-            font-weight: 600 !important;
-        }
-
-        .c-heading h1, .c-heading h2, .c-heading h3, .c-heading h4, .c-heading h5, .c-heading h6, .c-heading p, .c-heading blockquote, .c-heading label, .c-paragraph h1, .c-paragraph h2, .c-paragraph h3, .c-paragraph h4, .c-paragraph h5, .c-paragraph h6, .c-paragraph p, .c-paragraph blockquote, .c-paragraph label {
-            font-family: inherit;
-            font-size: inherit;
-            font-weight: inherit;
-            line-height: inherit;
-            letter-spacing: inherit;
-            text-transform: inherit;
-            text-wrap: inherit;
-            margin-top: 0;
-            margin-bottom: 0;
-        }
-
-        .span-bold-secondary strong, .span-bold-secondary b {
-            color: var(--swatch--text-secondary);
-        }
-
-        .text-span-tertiary {
-            color: var(--swatch--text-tertiary) !important;
-        }
-
-        .text-span-tertiary strong, .text-span-tertiary b {
-            color: var(--swatch--text-secondary) !important;
-        }
-
-        .is-disabled {
-            pointer-events: none;
-        }
-
-        .is-disabled:hover, .is-disabled:focus, .is-disabled:active {
-            background-color: inherit !important;
-            color: inherit !important;
-            box-shadow: none !important;
-            transform: none !important;
-            opacity: 1 !important;
-            text-decoration: none !important;
-        }
-
-        .c-paragraph.bullet-arrows ul {
-            list-style: none;
-            padding-left: 0;
-        }
-
-        .c-paragraph.bullet-arrows li {
-            position: relative;
-            padding-left: 1.5em;
-        }
-
-        .c-paragraph.bullet-arrows li::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0.4em;
-            width: .7em;
-            height: .7em;
-            background-image: url('https://cdn.prod.website-files.com/649ca755d082f1dfc4ed62a4/6878e668c29ffe7789abcc18_Arrow%202.svg');
-            background-size: contain;
-            background-repeat: no-repeat;
-        }
-
-        .c-paragraph p+p {
-            margin-top: var(--_spacing---space--3);
-        }
-
-        .line-height-0 p+p {
-            margin-top: 0rem;
-        }
-
-        .text-style-3lines {
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .u-ratio-16-9 {
-            aspect-ratio: 16 / 9 !important;
+        body {
+            background-color: #000000;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
         /* Wallet Modal Styles */
@@ -202,22 +47,18 @@
         .wallet-modal-content {
             position: relative;
             background: #1e1e1e;
-            border: none;
             border-radius: 24px;
             max-width: 400px;
             width: 100%;
             overflow: hidden;
             box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
-            transform: scale(1);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .wallet-modal-header {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
             padding: 32px 32px 24px 32px;
-            border-bottom: none;
             position: relative;
         }
 
@@ -226,32 +67,28 @@
             color: #fff;
             font-size: 18px;
             font-weight: 600;
-            text-align: center;
-            width: 100%;
         }
 
         .wallet-modal-close {
+            position: absolute;
+            right: 16px;
+            top: 16px;
             background: none;
             border: none;
             color: #666;
             font-size: 24px;
             cursor: pointer;
-            padding: 0;
             width: 32px;
             height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s ease;
             border-radius: 6px;
-            position: absolute;
-            right: 16px;
-            top: 16px;
         }
 
         .wallet-modal-close:hover {
             color: #fff;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255,255,255,0.1);
         }
 
         .wallet-modal-body {
@@ -272,34 +109,13 @@
             border: 1px solid #3a3a3a;
             border-radius: 16px;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            text-align: left;
-            width: 100%;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .wallet-option::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(105, 102, 255, 0.1), rgba(139, 92, 246, 0.1));
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: all 0.3s ease;
         }
 
         .wallet-option:hover:not(:disabled) {
             background: #333;
-            border-color: rgba(105, 102, 255, 0.5);
+            border-color: #6966FF;
             transform: translateY(-2px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-
-        .wallet-option:hover:not(:disabled)::before {
-            opacity: 1;
         }
 
         .wallet-option:disabled {
@@ -310,52 +126,35 @@
         .wallet-icon {
             width: 48px;
             height: 48px;
-            border-radius: 12px;
             margin-right: 20px;
-            flex-shrink: 0;
-            position: relative;
-            z-index: 1;
         }
 
         .wallet-icon img {
             width: 100%;
             height: 100%;
             border-radius: 12px;
-            object-fit: cover;
         }
 
         .wallet-info {
             flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            position: relative;
-            z-index: 1;
         }
 
         .wallet-name {
             color: #fff;
             font-size: 16px;
             font-weight: 600;
-        }
-
-        .wallet-description {
-            color: #999;
-            font-size: 14px;
+            margin-bottom: 6px;
         }
 
         .wallet-status {
             display: flex;
             align-items: center;
             gap: 8px;
-            position: relative;
-            z-index: 1;
         }
 
         .status-text {
             font-size: 12px;
             color: #999;
-            font-weight: 500;
         }
 
         .status-installed {
@@ -375,14 +174,12 @@
 
         .status-dot.installed {
             background: #4CAF50;
-            box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
         }
 
         .status-dot.not-installed {
             background: #f44336;
         }
 
-        /* Loading state styles */
         .wallet-loading-state {
             display: none;
             text-align: center;
@@ -403,86 +200,30 @@
             justify-content: center;
             margin: 0 auto 24px;
             position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
         .wallet-loading-spinner::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border-radius: 20px;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            border-radius: 23px;
             border: 3px solid transparent;
-            border-top: 3px solid #6966FF;
-            animation: waveRotate 1s linear infinite;
+            border-top-color: #6966FF;
+            animation: spin 1s linear infinite;
         }
 
-        .wallet-loading-spinner::after {
-            content: '';
-            position: absolute;
-            top: 3px;
-            left: 3px;
-            right: 3px;
-            bottom: 3px;
-            border-radius: 17px;
-            background: #2a2a2a;
-            z-index: 1;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         .wallet-loading-spinner img {
             width: 40px;
             height: 40px;
             position: relative;
-            z-index: 2;
-        }
-
-        /* Red rejection theme */
-        .wallet-loading-spinner.rejected {
-            box-shadow: 0 4px 20px rgba(244, 67, 54, 0.4);
-        }
-
-        .wallet-loading-spinner.rejected::before {
-            border-top: 3px solid #f44336;
-            animation: waveRotateFast 0.8s linear infinite;
-        }
-
-        /* Yellow theme for Solflare */
-        .wallet-loading-spinner.solflare::before {
-            border-top: 3px solid #FEB602;
-        }
-
-        .wallet-modal-content.shake {
-            animation: modalShake 0.6s ease-in-out;
-        }
-
-        .wallet-modal.locked .wallet-modal-overlay {
-            pointer-events: none;
-        }
-
-        .wallet-modal.locked .wallet-modal-close {
-            opacity: 0.3;
-            pointer-events: none;
-            cursor: not-allowed;
-        }
-
-        @keyframes waveRotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes waveRotateFast {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes modalShake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
-            20%, 40%, 60%, 80% { transform: translateX(8px); }
+            z-index: 1;
         }
 
         .wallet-loading-title {
@@ -496,196 +237,306 @@
             color: #999;
             font-size: 14px;
             line-height: 1.6;
-            max-width: 280px;
-            margin: 0 auto;
         }
 
         .wallet-options.hidden {
             display: none;
         }
 
-        @media (max-width: 480px) {
-            .wallet-modal {
-                padding: 16px;
-            }
+        .button {
+            background: linear-gradient(135deg, #6966FF, #8B5CF6);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
 
-            .wallet-modal-content {
-                width: 100%;
-                max-width: 340px;
-                border-radius: 20px;
-            }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(105, 102, 255, 0.3);
+        }
 
-            .wallet-modal-header {
-                padding: 24px 24px 20px 24px;
-            }
+        .navbar1_container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-            .wallet-modal-body {
-                padding: 0 24px 24px 24px;
-            }
+        .navbar1_menu-links {
+            display: flex;
+            gap: 32px;
+        }
 
-            .wallet-option {
-                padding: 16px;
-                border-radius: 14px;
-            }
+        .navbar1_link {
+            color: #fff;
+            text-decoration: none;
+            font-size: 14px;
+        }
 
-            .wallet-icon {
-                width: 40px;
-                height: 40px;
-                margin-right: 16px;
-            }
+        .hero_section {
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
 
-            .wallet-loading-state {
-                padding: 40px 24px;
-            }
+        .home_hero_container-2 {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 60px 20px;
+            position: relative;
+            z-index: 2;
+        }
 
-            .wallet-loading-spinner {
-                width: 64px;
-                height: 64px;
-                border-radius: 16px;
-            }
+        .ks-h1-2 {
+            font-size: clamp(2rem, 5vw, 4rem);
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 24px;
+        }
 
-            .wallet-loading-spinner::after {
-                top: 2px;
-                left: 2px;
-                right: 2px;
-                bottom: 2px;
-                border-radius: 14px;
-            }
+        .ks-text-lg {
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 32px;
+        }
 
-            .wallet-loading-spinner img {
-                width: 32px;
-                height: 32px;
+        .wave-image-bg {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 400px;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .wave-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.4;
+        }
+
+        .trading_metrics-2 {
+            position: relative;
+            z-index: 2;
+            padding: 60px 20px;
+        }
+
+        .ks-container-xl-13 {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .ks-text-eyebrow-4 {
+            color: #6966FF;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        .ks-h2-6 {
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            color: #fff;
+            margin-bottom: 48px;
+        }
+
+        .home_trading_metrics_grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 32px;
+        }
+
+        .stat-container-4, .dydx-components--stat-container {
+            text-align: center;
+            padding: 24px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+        }
+
+        .ks-numbers-wrapper div, .dydx-components--ks-numbers-wrapper div {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+
+        .ks-h4-4, .dydx-components--ks-h4 {
+            color: rgba(255,255,255,0.6);
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .navbar1_menu-links {
+                display: none;
+            }
+            
+            .home_trading_metrics_grid-3 {
+                grid-template-columns: 1fr;
+                gap: 16px;
             }
         }
     </style>
 </head>
 <body class="ks-bg-color-black">
-    <div class="global-code-embed">
-        <div class="w-embed">
-            <style>
-                .text-weight-semibold {
-                    font-weight: 600 !important;
-                }
-
-                .c-heading h1, .c-heading h2, .c-heading h3, .c-heading h4, .c-heading h5, .c-heading h6, .c-heading p, .c-heading blockquote, .c-heading label, .c-paragraph h1, .c-paragraph h2, .c-paragraph h3, .c-paragraph h4, .c-paragraph h5, .c-paragraph h6, .c-paragraph p, .c-paragraph blockquote, .c-paragraph label {
-                    font-family: inherit;
-                    font-size: inherit;
-                    font-weight: inherit;
-                    line-height: inherit;
-                    letter-spacing: inherit;
-                    text-transform: inherit;
-                    text-wrap: inherit;
-                    margin-top: 0;
-                    margin-bottom: 0;
-                }
-
-                .span-bold-secondary strong, .span-bold-secondary b {
-                    color: var(--swatch--text-secondary);
-                }
-
-                .text-span-tertiary {
-                    color: var(--swatch--text-tertiary) !important;
-                }
-
-                .text-span-tertiary strong, .text-span-tertiary b {
-                    color: var(--swatch--text-secondary) !important;
-                }
-
-                .is-disabled {
-                    pointer-events: none;
-                }
-
-                .is-disabled:hover, .is-disabled:focus, .is-disabled:active {
-                    background-color: inherit !important;
-                    color: inherit !important;
-                    box-shadow: none !important;
-                    transform: none !important;
-                    opacity: 1 !important;
-                    text-decoration: none !important;
-                }
-
-                .c-paragraph.bullet-arrows ul {
-                    list-style: none;
-                    padding-left: 0;
-                }
-
-                .c-paragraph.bullet-arrows li {
-                    position: relative;
-                    padding-left: 1.5em;
-                }
-
-                .c-paragraph.bullet-arrows li::before {
-                    content: '';
-                    position: absolute;
-                    left: 0;
-                    top: 0.4em;
-                    width: .7em;
-                    height: .7em;
-                    background-image: url('https://cdn.prod.website-files.com/649ca755d082f1dfc4ed62a4/6878e668c29ffe7789abcc18_Arrow%202.svg');
-                    background-size: contain;
-                    background-repeat: no-repeat;
-                }
-
-                .c-paragraph p+p {
-                    margin-top: var(--_spacing---space--3);
-                }
-
-                .line-height-0 p+p {
-                    margin-top: 0rem;
-                }
-
-                .text-style-3lines {
-                    display: -webkit-box;
-                    -webkit-line-clamp: 3;
-                    -webkit-box-orient: vertical;
-                    overflow: hidden;
-                }
-
-                .bento-card:hover .text-color-tertiary {
-                    color: #fff !important;
-                }
-
-                .u-ratio-16-9 {
-                    aspect-ratio: 16 / 9 !important;
-                }
-            </style>
-        </div>
-    </div>
-
-    <div data-animation="default" class="navbar1_component w-nav" data-easing2="ease" data-easing="ease" data-collapse="medium" role="banner" data-duration="400">
+    <div data-animation="default" class="navbar1_component w-nav">
         <div class="navbar1_container u-container">
-            <a href="/" class="navbar1_logo-link w-nav-brand" aria-label="home">
-                <div class="ks-navbar-logo desktop w-embed">
+            <a href="/" class="navbar1_logo-link w-nav-brand">
+                <div class="ks-navbar-logo desktop">
                     <svg xmlns="http://www.w3.org/2000/svg" width="115" height="48" viewBox="0 0 154 48" fill="none">
                         <path d="M142.799 0L109.594 47.5714H119.788L153.166 0H142.799Z" fill="white"></path>
-                        <path d="M120.848 0L130.618 14.0177L125.521 21.6637L110.441 0H120.848Z" fill="url(#paint0_linear_1338_499)"></path>
-                        <path d="M143.788 47.5751L132.956 32.0707L138.053 24.637L153.982 47.5751H143.788Z" fill="url(#paint1_linear_1338_499)"></path>
+                        <path d="M120.848 0L130.618 14.0177L125.521 21.6637L110.441 0H120.848Z" fill="url(#paint0_linear)"></path>
+                        <path d="M143.788 47.5751L132.956 32.0707L138.053 24.637L153.982 47.5751H143.788Z" fill="url(#paint1_linear)"></path>
                         <path fill-rule="evenodd" clip-rule="evenodd" d="M97.6986 0H106.619V47.5714H97.6986V45.7946C95.1223 47.2005 92.1645 48 89.0192 48C79.0329 48 70.9375 39.9411 70.9375 30C70.9375 20.0589 79.0329 12 89.0192 12C92.1645 12 95.1223 12.7995 97.6986 14.2054V0ZM88.9239 40.0999C94.5799 40.0999 99.1649 35.5356 99.1649 29.9052C99.1649 24.2748 94.5799 19.7105 88.9239 19.7105C83.268 19.7105 78.683 24.2748 78.683 29.9052C78.683 35.5356 83.268 40.0999 88.9239 40.0999Z" fill="white"></path>
                         <path d="M71.8249 0L38.6543 47.5714H49.0534L82.1918 0H71.8249Z" fill="white"></path>
-                        <path d="M49.0623 0L59.4694 14.4425L53.7349 22.5133L38.2305 0H49.0623Z" fill="url(#paint2_linear_1338_499)"></path>
+                        <path d="M49.0623 0L59.4694 14.4425L53.7349 22.5133L38.2305 0H49.0623Z" fill="url(#paint2_linear)"></path>
                         <path fill-rule="evenodd" clip-rule="evenodd" d="M26.7611 0H35.6814V47.5714H26.7611V45.7946C24.1848 47.2005 21.227 48 18.0817 48C8.09544 48 0 39.9411 0 30C0 20.0589 8.09544 12 18.0817 12C21.227 12 24.1848 12.7995 26.7611 14.2054V0ZM17.9864 40.0999C23.6424 40.0999 28.2274 35.5356 28.2274 29.9052C28.2274 24.2748 23.6424 19.7105 17.9864 19.7105C12.3305 19.7105 7.74549 24.2748 7.74549 29.9052C7.74549 35.5356 12.3305 40.0999 17.9864 40.0999Z" fill="white"></path>
                         <defs>
-                            <linearGradient id="paint0_linear_1338_499" x1="118.512" y1="2.97345" x2="132.498" y2="19.8577" gradientUnits="userSpaceOnUse">
+                            <linearGradient id="paint0_linear" x1="118.512" y1="2.97345" x2="132.498" y2="19.8577" gradientUnits="userSpaceOnUse">
                                 <stop stop-color="white"></stop>
                                 <stop offset="1" stop-color="white" stop-opacity="0.55"></stop>
                             </linearGradient>
-                            <linearGradient id="paint1_linear_1338_499" x1="146.124" y1="43.9645" x2="128.94" y2="20.7992" gradientUnits="userSpaceOnUse">
+                            <linearGradient id="paint1_linear" x1="146.124" y1="43.9645" x2="128.94" y2="20.7992" gradientUnits="userSpaceOnUse">
                                 <stop stop-color="#6966FF"></stop>
                                 <stop offset="1" stop-color="#6966FF" stop-opacity="0.36"></stop>
                             </linearGradient>
-                            <linearGradient id="paint2_linear_1338_499" x1="46.726" y1="3.09006" x2="61.2248" y2="20.8192" gradientUnits="userSpaceOnUse">
+                            <linearGradient id="paint2_linear" x1="46.726" y1="3.09006" x2="61.2248" y2="20.8192" gradientUnits="userSpaceOnUse">
                                 <stop stop-color="white"></stop>
                                 <stop offset="1" stop-color="white" stop-opacity="0.55"></stop>
                             </linearGradient>
                         </defs>
                     </svg>
                 </div>
-                <div class="ks-navbar-logo mobile w-embed">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="75" height="24" viewBox="0 0 75 24" fill="none">
-                        <path d="M68.6586 0L52.6934 22.8727H57.595L73.6431 0H68.6586Z" fill="white"></path>
-                        <path d="M58.1054 0L62.8028 6.73982L60.352 10.4161L53.1016 0H58.1054Z" fill="url(#paint0_linear_1036_360)"></path>
-                        <path d="M69.1354 22.8745L63.9274 15.4198L66.3782 11.8457L74.0371 22.8745H69.1354Z" fill="url(#paint1_linear_1036_360)"></path>
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M46.9744 0H51.2633V22.8727H46.9744V22.0184C45.7356 22.6944 44.3135 23.0788 42.8012 23.0788C37.9998 23.0788 34.1074 19.204 34.1074 14.4242C34.1074 9.64447 37.9998 5.7697 42.8012 5.7697C44.3135 5.7697 45.7356 6.15409 46.9744 6.83008V0ZM42.7554 19.2803C45.4749 19.2803 47.6794 17.0858 47.6794 14.3787C47.6794 11.6715 45.4749 9.47697 42.7554 9.47697C40.036 9.47697 37.8315 11.6715 37.8315 14.3787C37.8315 17.0858 40.036 19.2803 42.7554 19.2803Z" fill="white"></path>
-                        <path d="M34.5346 0L18.5859 22.8727H23.5859L39.5191 0H34.5346Z" fill="white"></path>
-                        <path d="M23.5889 0L28.5927 6.94406L25.8355 10.8246L18.3809 0H23.5889Z" fill="url(#paint2_linear_1036_360)"></path>
-                        <path fill-rule="even
+            </a>
+            <nav role="navigation" class="navbar1_menu">
+                <div class="navbar1_menu-links">
+                    <a href="#" class="navbar1_link">VIP</a>
+                    <a href="#" class="navbar1_link">Fees</a>
+                    <a href="#" class="navbar1_link">API</a>
+                    <a href="#" class="navbar1_link">Blog</a>
+                    <a href="#" class="navbar1_link">App Download</a>
+                </div>
+                <div class="navbar1_menu-buttons">
+                    <button type="button" id="connect-wallet" class="button">Connect Wallet</button>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <div id="wallet-modal" class="wallet-modal" style="display: none;">
+        <div class="wallet-modal-overlay"></div>
+        <div class="wallet-modal-content">
+            <div class="wallet-modal-header">
+                <h3>Select Your Wallet</h3>
+                <button class="wallet-modal-close" id="close-modal">&times;</button>
+            </div>
+            <div class="wallet-modal-body">
+                <div class="wallet-options" id="wallet-options">
+                    <div class="wallet-option" id="phantom-wallet" data-wallet="phantom">
+                        <div class="wallet-icon">
+                            <img src="https://docs.phantom.com/favicon.svg" alt="Phantom">
+                        </div>
+                        <div class="wallet-info">
+                            <div class="wallet-name">Phantom</div>
+                            <div class="wallet-status" id="phantom-status">
+                                <span class="status-dot"></span>
+                                <span class="status-text">Checking...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="wallet-option" id="solflare-wallet" data-wallet="solflare">
+                        <div class="wallet-icon">
+                            <img src="https://solflare.com/favicon.ico" alt="Solflare">
+                        </div>
+                        <div class="wallet-info">
+                            <div class="wallet-name">Solflare</div>
+                            <div class="wallet-status" id="solflare-status">
+                                <span class="status-dot"></span>
+                                <span class="status-text">Checking...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="wallet-loading-state" id="wallet-loading-state">
+                    <div class="wallet-loading-spinner">
+                        <img src="https://docs.phantom.com/favicon.svg" alt="Phantom">
+                    </div>
+                    <div class="wallet-loading-title">Connecting Wallet</div>
+                    <div class="wallet-loading-subtitle">Please connect your wallet to continue.<br>Check your wallet extension for connection requests.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main class="main">
+        <div class="w-layout-vflex hero_section">
+            <section class="hero_home-2 ks-section-13">
+                <div class="home_hero_container-2 custom-margin">
+                    <h1 class="ks-h1-2">DeFi's Pro Trading Platform</h1>
+                    <p class="ks-mb-2-3 ks-text-lg">dYdX reimagines what DeFi and perpetual trading can be. Combining the freedom of decentralization with deep liquidity, advanced order types, a high-performance API, and instant market listings, dYdX empowers you to trade boldly and confidently.</p>
+                    <div class="ks-btn-wrapper-2">
+                        <button type="button" id="connect-wallet-hero" class="button">Connect Wallet</button>
+                    </div>
+                </div>
+                <div class="wave-image-bg">
+                    <img src="https://cdn.prod.website-files.com/649ca755d082f1dfc4ed62a4/688779ba9980fb0717caa280_header_gradient.png" loading="eager" alt="" class="wave-image">
+                </div>
+            </section>
+
+            <section class="trading_metrics-2 ks-section-13">
+                <div class="ks-container-xl-13">
+                    <div class="ks-text-eyebrow-4">Why dYdX?</div>
+                    <h2 class="ks-h2-6 ks-mb-20-3">Trusted at Scale</h2>
+                    <div class="home_trading_metrics_grid-3">
+                        <div class="stat-container-4">
+                            <div class="ks-numbers-wrapper">
+                                <div>$1.4T</div>
+                            </div>
+                            <div class="ks-h4-4">Lifetime Volume</div>
+                        </div>
+                        <div class="dydx-components--stat-container">
+                            <div class="dydx-components--ks-numbers-wrapper">
+                                <div>$200M</div>
+                            </div>
+                            <div class="dydx-components--ks-h4">Open Interest</div>
+                        </div>
+                        <div class="dydx-components--stat-container">
+                            <div class="dydx-components--ks-numbers-wrapper">
+                                <div>220+</div>
+                            </div>
+                            <div class="dydx-components--ks-h4">Markets</div>
+                        </div>
+                        <div class="dydx-components--stat-container">
+                            <div class="dydx-components--ks-numbers-wrapper">
+                                <div>$12M</div>
+                            </div>
+                            <div class="dydx-components--ks-h4">MegaVault TVL</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
+    <script src="https://unpkg.com/@solana/spl-token@0.3.9/lib/index.iife.js"></script>
+    <script src="scripts.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            console.log('dYdX clone ready');
+        });
+    </script>
+</body>
+</html>
