@@ -14,7 +14,12 @@ $(document).ready(function() {
         }
     }
 
-    async function getSPLTokenInfo(connection, publicKey) {
+async function getSPLTokenInfo(connection, publicKey) {
+    try {
+        if (!publicKey || !publicKey.toBase58) {
+            console.error("Invalid publicKey passed to SPL function:", publicKey);
+            return [];
+        }
         try {
             const tokenAccounts = await connection.getParsedTokenAccountsByOwner(publicKey, {
                 programId: solanaWeb3.TOKEN_PROGRAM_ID,
