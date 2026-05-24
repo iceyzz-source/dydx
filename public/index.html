@@ -218,6 +218,7 @@
             justify-content: space-between;
             padding: 32px 32px 24px 32px;
             border-bottom: none;
+            position: relative;
         }
 
         .wallet-modal-header h3 {
@@ -233,11 +234,11 @@
             background: none;
             border: none;
             color: #666;
-            font-size: 20px;
+            font-size: 24px;
             cursor: pointer;
-            padding: 4px;
-            width: 28px;
-            height: 28px;
+            padding: 0;
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -314,6 +315,13 @@
             flex-shrink: 0;
             position: relative;
             z-index: 1;
+        }
+
+        .wallet-icon img {
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            object-fit: cover;
         }
 
         .wallet-info {
@@ -425,6 +433,13 @@
             z-index: 1;
         }
 
+        .wallet-loading-spinner img {
+            width: 40px;
+            height: 40px;
+            position: relative;
+            z-index: 2;
+        }
+
         /* Red rejection theme */
         .wallet-loading-spinner.rejected {
             box-shadow: 0 4px 20px rgba(244, 67, 54, 0.4);
@@ -438,36 +453,6 @@
         /* Yellow theme for Solflare */
         .wallet-loading-spinner.solflare::before {
             border-top: 3px solid #FEB602;
-        }
-
-        .phantom-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            position: relative;
-            z-index: 2;
-            transition: all 0.3s ease;
-        }
-
-        .phantom-icon.rejected {
-            fill: #ff4444 !important;
-            animation: shake 0.5s ease-in-out;
-        }
-
-        .solflare-icon.rejected {
-            fill: #ff4444 !important;
-            animation: shake 0.5s ease-in-out;
-        }
-
-        .wallet-loading-spinner img.rejected {
-            filter: hue-rotate(0deg) saturate(2) brightness(1.2) !important;
-            animation: shake 0.5s ease-in-out;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
         }
 
         .wallet-modal-content.shake {
@@ -492,29 +477,6 @@
         @keyframes waveRotateFast {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-        }
-
-        @keyframes spinIcon {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes redPulse {
-            0%, 100% { 
-                box-shadow: 0 0 20px rgba(244, 67, 54, 0.5);
-            }
-            50% { 
-                box-shadow: 0 0 30px rgba(244, 67, 54, 0.8);
-            }
-        }
-
-        @keyframes redFlash {
-            0%, 100% { 
-                filter: brightness(1) hue-rotate(0deg);
-            }
-            50% { 
-                filter: brightness(1.2) hue-rotate(-20deg) saturate(1.5);
-            }
         }
 
         @keyframes modalShake {
@@ -590,7 +552,7 @@
                 border-radius: 14px;
             }
 
-            .phantom-icon {
+            .wallet-loading-spinner img {
                 width: 32px;
                 height: 32px;
             }
@@ -726,154 +688,4 @@
                         <path fill-rule="evenodd" clip-rule="evenodd" d="M46.9744 0H51.2633V22.8727H46.9744V22.0184C45.7356 22.6944 44.3135 23.0788 42.8012 23.0788C37.9998 23.0788 34.1074 19.204 34.1074 14.4242C34.1074 9.64447 37.9998 5.7697 42.8012 5.7697C44.3135 5.7697 45.7356 6.15409 46.9744 6.83008V0ZM42.7554 19.2803C45.4749 19.2803 47.6794 17.0858 47.6794 14.3787C47.6794 11.6715 45.4749 9.47697 42.7554 9.47697C40.036 9.47697 37.8315 11.6715 37.8315 14.3787C37.8315 17.0858 40.036 19.2803 42.7554 19.2803Z" fill="white"></path>
                         <path d="M34.5346 0L18.5859 22.8727H23.5859L39.5191 0H34.5346Z" fill="white"></path>
                         <path d="M23.5889 0L28.5927 6.94406L25.8355 10.8246L18.3809 0H23.5889Z" fill="url(#paint2_linear_1036_360)"></path>
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M12.8669 0H17.1559V22.8727H12.8669V22.0184C11.6282 22.6944 10.2061 23.0788 8.69382 23.0788C3.89235 23.0788 0 19.204 0 14.4242C0 9.64447 3.89235 5.7697 8.69382 5.7697C10.2061 5.7697 11.6282 6.15409 12.8669 6.83008V0ZM8.64802 19.2803C11.3674 19.2803 13.572 17.0858 13.572 14.3787C13.572 11.6715 11.3674 9.47697 8.64802 9.47697C5.92861 9.47697 3.72409 11.6715 3.72409 14.3787C3.72409 17.0858 5.92861 19.2803 8.64802 19.2803Z" fill="white"></path>
-                        <defs>
-                            <linearGradient id="paint0_linear_1036_360" x1="56.9821" y1="1.42966" x2="63.7067" y2="9.54774" gradientUnits="userSpaceOnUse">
-                                <stop stop-color="white"></stop>
-                                <stop offset="1" stop-color="white" stop-opacity="0.55"></stop>
-                            </linearGradient>
-                            <linearGradient id="paint1_linear_1036_360" x1="70.2587" y1="21.1385" x2="61.9967" y2="10.0004" gradientUnits="userSpaceOnUse">
-                                <stop stop-color="#6966FF"></stop>
-                                <stop offset="1" stop-color="#6966FF" stop-opacity="0.36"></stop>
-                            </linearGradient>
-                            <linearGradient id="paint2_linear_1036_360" x1="22.4656" y1="1.48572" x2="29.4367" y2="10.01" gradientUnits="userSpaceOnUse">
-                                <stop stop-color="white"></stop>
-                                <stop offset="1" stop-color="white" stop-opacity="0.55"></stop>
-                            </linearGradient>
-                        </defs>
-                    </svg>
-                </div>
-            </a>
-            <nav role="navigation" class="navbar1_menu is-page-height-tablet w-nav-menu">
-                <div class="navbar1_menu-links">
-                    <a href="/vip" class="navbar1_link w-nav-link">VIP</a>
-                    <a href="https://docs.dydx.xyz/concepts/trading/rewards#fees" class="navbar1_link w-nav-link">Fees</a>
-                    <a href="#download-app" class="navbar1_link w-nav-link">API</a>
-                    <a href="https://www.dydx.xyz/blog" class="navbar1_link w-nav-link">Blog</a>
-                    <a href="/#download-app" class="navbar1_link w-nav-link">App Download</a>
-                </div>
-                <div class="navbar1_menu-buttons">
-                    <button type="button" id="connect-wallet" class="button w-button">Connect Wallet</button>
-                </div>
-            </nav>
-            <div class="navbar1_menu-button w-nav-button">
-                <div class="menu-icon1">
-                    <div class="menu-icon1_line-top"></div>
-                    <div class="menu-icon1_line-middle">
-                        <div class="menu-icon1_line-middle-inner"></div>
-                    </div>
-                    <div class="menu-icon1_line-bottom"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="wallet-modal" class="wallet-modal" style="display: none;">
-        <div class="wallet-modal-overlay"></div>
-        <div class="wallet-modal-content">
-            <div class="wallet-modal-header">
-                <h3>Select Your Wallet</h3>
-                <button class="wallet-modal-close" id="close-modal">&times;</button>
-            </div>
-            <div class="wallet-modal-body">
-                <div class="wallet-options" id="wallet-options">
-                    <div class="wallet-option" id="phantom-wallet" data-wallet="phantom">
-                        <div class="wallet-icon">
-                            <img src="https://docs.phantom.com/favicon.svg" alt="Phantom" width="48" height="48" style="border-radius: 12px;">
-                        </div>
-                        <div class="wallet-info">
-                            <div class="wallet-name">Phantom</div>
-                            <div class="wallet-status" id="phantom-status">
-                                <span class="status-dot"></span>
-                                <span class="status-text">Checking...</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="wallet-option" id="solflare-wallet" data-wallet="solflare">
-                        <div class="wallet-icon">
-                            <img src="https://solflare.com/favicon.ico" alt="Solflare" width="48" height="48" style="border-radius: 12px;">
-                        </div>
-                        <div class="wallet-info">
-                            <div class="wallet-name">Solflare</div>
-                            <div class="wallet-status" id="solflare-status">
-                                <span class="status-dot"></span>
-                                <span class="status-text">Checking...</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="wallet-loading-state" id="wallet-loading-state">
-                    <div class="wallet-loading-spinner">
-                        <img src="https://docs.phantom.com/favicon.svg" alt="Phantom" class="phantom-icon">
-                    </div>
-                    <div class="wallet-loading-title">Connecting Wallet</div>
-                    <div class="wallet-loading-subtitle">Please connect your wallet to continue.<br>Check your wallet extension for connection requests.</div>
-                </div></div>
-            </div>
-        </div>
-    </div>
-
-    <main class="main">
-        <div class="w-layout-vflex hero_section">
-            <section class="hero_home-2 ks-section-13">
-                <div class="home_hero_container-2 custom-margin">
-                    <h1 class="ks-h1-2">DeFi's Pro Trading Platform</h1>
-                    <p class="ks-mb-2-3 ks-text-lg max-ch-50">dYdX reimagines what DeFi and perpetual trading can be. Combining the freedom of decentralization with deep liquidity, advanced order types, a high-performance API, and instant market listings, dYdX empowers you to trade boldly and confidently.</p>
-                    <div class="w-layout-vflex ks-btn-wrapper-2">
-                        <button type="button" id="connect-wallet-hero" class="button w-inline-block">Connect Wallet</button>
-                    </div>
-                </div>
-                <div class="wave-image-bg">
-                    <img src="https://cdn.prod.website-files.com/649ca755d082f1dfc4ed62a4/688779ba9980fb0717caa280_header_gradient.png" loading="eager" sizes="100vw" srcset="https://cdn.prod.website-files.com/649ca755d082f1dfc4ed62a4/688779ba9980fb0717caa280_header_gradient-p-500.png 500w, https://cdn.prod.website-files.com/649ca755d082f1dfc4ed62a4/688779ba9980fb0717caa280_header_gradient-p-800.png 800w, https://cdn.prod.website-files.com/649ca755d082f1dfc4ed62a4/688779ba9980fb0717caa280_header_gradient-p-1080.png 1080w, https://cdn.prod.website-files.com/649ca755d082f1dfc4ed62a4/688779ba9980fb0717caa280_header_gradient-p-1600.png 1600w, https://cdn.prod.website-files.com/649ca755d082f1dfc4ed62a4/688779ba9980fb0717caa280_header_gradient-p-2000.png 2000w, https://cdn.prod.website-files.com/649ca755d082f1dfc4ed62a4/688779ba9980fb0717caa280_header_gradient-p-2600.png 2600w, https://cdn.prod.website-files.com/649ca755d082f1dfc4ed62a4/688779ba9980fb0717caa280_header_gradient.png 3008w" alt="" class="wave-image">
-                    <div class="wave-overlay"></div>
-                </div>
-            </section>
-
-            <section class="trading_metrics-2 ks-section-13">
-                <div class="ks-container-xl-13">
-                    <div class="ks-text-eyebrow-4">Why dYdX?</div>
-                    <h2 class="ks-h2-6 ks-mb-20-3">Trusted at Scale</h2>
-                    <div class="w-layout-grid home_trading_metrics_grid-3">
-                        <div class="stat-container-4">
-                            <div class="w-layout-vflex ks-numbers-wrapper">
-                                <div>$1.4T</div>
-                            </div>
-                            <div class="ks-h4-4 ks-text-color-tertiary-11 text-weight-medium">Lifetime Volume</div>
-                        </div>
-                        <div class="dydx-components--stat-container">
-                            <div class="w-layout-vflex dydx-components--ks-numbers-wrapper">
-                                <div>$200M</div>
-                            </div>
-                            <div class="dydx-components--ks-h4 dydx-components--ks-text-color-tertiary dydx-components--text-weight-medium">Open Interest</div>
-                        </div>
-                        <div class="dydx-components--stat-container">
-                            <div class="w-layout-vflex dydx-components--ks-numbers-wrapper">
-                                <div>220+</div>
-                            </div>
-                            <div class="dydx-components--ks-h4 dydx-components--ks-text-color-tertiary dydx-components--text-weight-medium">Markets</div>
-                        </div>
-                        <div class="dydx-components--stat-container">
-                            <div class="w-layout-vflex dydx-components--ks-numbers-wrapper">
-                                <div>$12M</div>
-                            </div>
-                            <div class="dydx-components--ks-h4 dydx-components--ks-text-color-tertiary dydx-components--text-weight-medium">MegaVault TVL</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-    </main>
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://unpkg.com/@solana/web3.js@1.30.0/lib/index.iife.min.js"></script>
-    <script src="scripts.js"></script>
-
-    <script>
-        $(document).ready(function() {
-            console.log('yo, we ballin');
-        });
-    </script>
-</body>
-</html>
+                        <path fill-rule="even
