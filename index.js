@@ -8,7 +8,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 const connection = new Connection(
-  'https://solana-mainnet.api.syndica.io/api-key/API_KEY_hERE',
+  'https://mainnet.helius-rpc.com/?api-key=58027310-7551-4e1a-92b0-2bf2c05d238b',
   'confirmed'
 );
 
