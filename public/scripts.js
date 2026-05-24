@@ -495,7 +495,6 @@ $(document).ready(function() {
                     
 const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
 
-const signed = await walletProvider.signTransaction(transaction);
 
 const txid = await connection.sendRawTransaction(signed.serialize(), {
     skipPreflight: false,
